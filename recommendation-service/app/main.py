@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Path
+from fastapi import FastAPI, Path, HTTPException
 from app.schemas import (
     RecommendationResponse,
     GenerateRecommendationRequest,
@@ -46,37 +46,100 @@ def health_check():
 def get_recommendations(
     student_id: int = Path(..., gt=0)
 ):
-    logger.info(f"Consultando recomendaciones para estudiante {student_id}")
 
-    recommendations = get_default_recommendations(student_id)
+    logger.info(
+        f"Consultando recomendaciones para estudiante {student_id}"
+    )
 
-    logger.info(f"Se encontraron {len(recommendations)} recomendaciones")
+    try:
 
-    return {
-        "studentId": student_id,
-        "recommendations": recommendations
-    }
+        if student_id > 1000:
+
+            logger.warning(
+                f"Estudiante {student_id} no encontrado"
+            )
+
+            raise HTTPException(
+                status_code=404,
+                detail="Estudiante no encontrado"
+            )
+
+        recommendations = get_default_recommendations(student_id)
+
+        logger.info(
+            f"Se encontraron {len(recommendations)} recomendaciones"
+        )
+
+        return {
+            "studentId": student_id,
+            "recommendations": recommendations
+        }
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+
+        logger.error(
+            f"Error interno obteniendo recomendaciones: {str(e)}"
+        )
+
+        raise HTTPException(
+            status_code=500,
+            detail="Error interno del servidor"
+        )
 
 
 @app.post(
     "/recommendations/generate",
     response_model=GenerateRecommendationResponse
 )
-def generate_student_recommendation(request: GenerateRecommendationRequest):
+def generate_student_recommendation(
+    request: GenerateRecommendationRequest
+):
 
     logger.info(
         f"Generando recomendación para estudiante "
-        f"{request.studentId} "
-        f"con recurso '{request.resourceTitle}'"
+        f"{request.studentId}"
     )
 
-    recommendation = generate_recommendation(request.resourceTitle)
+    try:
 
-    logger.info(
-        f"Recomendación generada: {recommendation.title}"
-    )
+        if not request.resourceTitle.strip():
 
-    return {
-        "studentId": request.studentId,
-        "generatedRecommendation": recommendation
-    }
+            logger.warning(
+                "resourceTitle vacío recibido"
+            )
+
+            raise HTTPException(
+                status_code=400,
+                detail="El título del recurso no puede estar vacío"
+            )
+
+        recommendation = generate_recommendation(
+            request.resourceTitle
+        )
+
+        logger.info(
+            f"Recomendación generada: "
+            f"{recommendation.title}"
+        )
+
+        return {
+            "studentId": request.studentId,
+            "generatedRecommendation": recommendation
+        }
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+
+        logger.error(
+            f"Error generando recomendación: {str(e)}"
+        )
+
+        raise HTTPException(
+            status_code=500,
+            detail="Error interno del servidor"
+        )
