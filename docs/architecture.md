@@ -17,6 +17,7 @@ El sistema utiliza Java y Python comunicándose mediante REST y RabbitMQ.
 
 # Arquitectura general
 
+```text
 Cliente/Postman
         |
         v
@@ -25,6 +26,7 @@ academic-service (Java)
         |---- REST ----> recommendation-service (Python)
         |
         |---- RabbitMQ -> recommendation-worker (Python)
+```
 
 ---
 
