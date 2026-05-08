@@ -90,17 +90,17 @@ Tecnologías:
 
 La comunicación REST ocurre entre:
 
-
+```text
 academic-service ---> recommendation-service
-
+```
 
 Se utiliza para consultar recomendaciones académicas desde Python.
 
 Ejemplo conceptual:
 
-
+```text
 GET /recommendations/{studentId}
-
+```
 
 ---
 
@@ -108,9 +108,9 @@ GET /recommendations/{studentId}
 
 La comunicación mediante colas ocurre usando RabbitMQ.
 
-
+```text
 academic-service ---> RabbitMQ ---> recommendation-worker
-
+```
 
 Cuando un estudiante completa un recurso:
 
@@ -126,20 +126,27 @@ Cuando un estudiante completa un recurso:
 
 Evento utilizado:
 
+```text
 RESOURCE_COMPLETED
-
+```
 
 Exchange:
 
+```text
 academic.events.exchange
+```
 
 Queue:
 
+```text
 academic.events.queue
+```
 
 Routing Key:
 
+```text
 academic.resource.completed
+```
 
 ---
 
@@ -179,12 +186,14 @@ Tablas principales:
 
 # Flujo principal del sistema
 
+```text
 1. Estudiante completa recurso
 2. Java registra progreso
 3. Java publica evento RESOURCE_COMPLETED
 4. RabbitMQ recibe el mensaje
 5. Python consume el evento
 6. Python genera recomendaciones
+```
 
 ---
 
