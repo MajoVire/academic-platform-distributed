@@ -74,27 +74,6 @@ academic-service (Java)
 - Postman
 - VS Code
 
----
-
-# Estructura del proyecto
-
-```text
-academic-platform-distributed/
-│
-├── database/
-│   └── init.sql
-│
-├── docs/
-│   ├── architecture.md
-│   └── demo-flow.md
-│
-├── postman/
-│   └── collection.json
-│
-├── docker-compose.yml
-│
-└── README.md
-```
 
 ---
 
