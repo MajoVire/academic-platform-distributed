@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: academic-service
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    dynamic: false
+
+server:
+  port: ${SERVER_PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+info:
+  app:
+    name: academic-service
+
+academic:
+  messaging:
+    rabbitmq:
+      exchange: ${ACADEMIC_EVENTS_EXCHANGE:academic.events.exchange}
+      queue: ${ACADEMIC_EVENTS_QUEUE:academic.events.queue}
+      routing-key: ${ACADEMIC_RESOURCE_COMPLETED_ROUTING_KEY:academic.resource.completed}
+
+recommendation:
+  service:
+    url: ${RECOMMENDATION_SERVICE_URL:http://localhost:8000}
