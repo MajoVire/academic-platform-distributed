@@ -2,44 +2,28 @@
 
 Proyecto académico desarrollado para las asignaturas de Sistemas Distribuidos y Programación Web.
 
-La plataforma permite consultar materias, cursos complementarios, recursos de aprendizaje y progreso básico de estudiantes mediante una arquitectura basada en microservicios.
+La plataforma permite consultar materias, cursos complementarios, recursos de aprendizaje y progreso básico de estudiantes mediante una arquitectura basada en microservicios utilizando Java y Python.
 
 ---
 
-# Tecnologías utilizadas
+# Objetivo del proyecto
 
-## Backend
+El objetivo principal es implementar una arquitectura distribuida que demuestre:
 
-* Java 17
-* Spring Boot
-* Python
-* FastAPI
-
-## Comunicación distribuida
-
-* RabbitMQ
-* API REST
-
-## Base de datos
-
-* PostgreSQL
-
-## Infraestructura
-
-* Docker
-* Docker Compose
-
-## Control de versiones
-
-* Git
-* GitHub
+- Uso de microservicios
+- Comunicación REST
+- Comunicación mediante colas
+- Integración entre Java y Python
+- Uso de hilos
+- Procesamiento asíncrono
+- Contenedores Docker
+- Orquestación básica de servicios
 
 ---
 
 # Arquitectura general
 
-El sistema está compuesto por varios servicios distribuidos:
-
+```text
 Cliente/Postman
         |
         v
@@ -47,225 +31,339 @@ academic-service (Java)
         |
         |---- REST ----> recommendation-service (Python)
         |
-        |---- RabbitMQ -> recommendation-worker (Python)
+        |---- RabbitMQ ---> recommendation-worker (Python)
+```
 
-## Componentes
+---
 
-### academic-service
+# Tecnologías utilizadas
+
+## Backend
+
+- Java 17
+- Spring Boot
+- Python
+- FastAPI
+
+---
+
+## Comunicación distribuida
+
+- RabbitMQ
+- API REST
+
+---
+
+## Base de datos
+
+- PostgreSQL
+
+---
+
+## Infraestructura
+
+- Docker
+- Docker Compose
+
+---
+
+## Herramientas
+
+- Git
+- GitHub
+- Postman
+- VS Code
+
+---
+
+# Estructura del proyecto
+
+```text
+academic-platform-distributed/
+│
+├── database/
+│   └── init.sql
+│
+├── docs/
+│   ├── architecture.md
+│   └── demo-flow.md
+│
+├── postman/
+│   └── collection.json
+│
+├── docker-compose.yml
+│
+└── README.md
+```
+
+---
+
+# Componentes del sistema
+
+## academic-service
 
 Microservicio principal desarrollado en Java con Spring Boot.
 
 Responsabilidades:
 
-* Consultar materias
-* Consultar cursos complementarios
-* Consultar recursos académicos
-* Registrar progreso del estudiante
-* Publicar eventos en RabbitMQ
+- Consultar materias
+- Consultar cursos
+- Consultar recursos
+- Registrar progreso académico
+- Publicar eventos en RabbitMQ
 
 ---
 
-### recommendation-service
+## recommendation-service
 
 Microservicio desarrollado en Python.
 
 Responsabilidades:
 
-* Generar recomendaciones académicas
-* Exponer endpoints REST para recomendaciones
+- Generar recomendaciones académicas
+- Exponer endpoints REST
 
 ---
 
-### recommendation-worker
+## recommendation-worker
 
 Worker desarrollado en Python.
 
 Responsabilidades:
 
-* Consumir eventos desde RabbitMQ
-* Procesar eventos académicos
-* Generar recomendaciones automáticas
+- Consumir mensajes desde RabbitMQ
+- Procesar eventos académicos
+- Generar recomendaciones automáticas
 
 ---
 
-# Comunicación entre servicios
+# Comunicación REST
 
-El proyecto implementa dos tipos de comunicación distribuida:
-
-## Comunicación REST
-
+```text
 academic-service ---> recommendation-service
+```
+
 Se utiliza para consultar recomendaciones académicas.
 
+Ejemplo conceptual:
+
+```text
+GET /recommendations/{studentId}
+```
+
 ---
 
-## Comunicación mediante colas
+# Comunicación mediante colas
 
-
+```text
 academic-service ---> RabbitMQ ---> recommendation-worker
-Se utiliza para publicar y consumir eventos académicos.
+```
 
 Evento principal:
-RESOURCE_COMPLETED
 
+```text
+RESOURCE_COMPLETED
+```
+
+---
+
+# Configuración RabbitMQ
+
+## Exchange
+
+```text
+academic.events.exchange
+```
+
+## Queue
+
+```text
+academic.events.queue
+```
+
+## Routing Key
+
+```text
+academic.resource.completed
+```
+
+---
+
+# Base de datos PostgreSQL
+
+## Base de datos
+
+```text
+academic_platform
+```
+
+## Usuario
+
+```text
+postgres
+```
+
+## Contraseña
+
+```text
+postgres
+```
+
+---
+
+# Tablas principales
+
+- subjects
+- courses
+- resources
+- student_progress
+- activity_log
 
 ---
 
 # Infraestructura Docker
 
-El proyecto utiliza Docker Compose para levantar todos los servicios necesarios.
+Servicios configurados:
 
-Servicios actuales:
-
-| Servicio            | Puerto |
-| ------------------- | ------ |
-| PostgreSQL          | 5432   |
-| RabbitMQ            | 5672   |
-| RabbitMQ Management | 15672  |
+| Servicio | Puerto |
+|---|---|
+| PostgreSQL | 5432 |
+| RabbitMQ | 5672 |
+| RabbitMQ Management | 15672 |
 
 ---
 
-# Cómo levantar el proyecto
+# Levantar el proyecto
 
-## 1. Requisitos
+## 1. Clonar repositorio
 
-Tener instalado:
-
-* Docker Desktop
-* Git
-* Visual Studio Code
-
----
-
-## 2. Clonar repositorio
-
+```bash
 git clone <URL_DEL_REPOSITORIO>
+```
 
 Entrar al proyecto:
+
+```bash
 cd academic-platform-distributed
+```
 
 ---
 
-## 3. Levantar infraestructura
+## 2. Levantar infraestructura
 
-Ejecutar:
+```bash
 docker compose up -d
+```
 
 ---
 
-## 4. Verificar contenedores
+## 3. Verificar contenedores
 
+```bash
 docker ps
-
-Deben aparecer:
-
-* postgres
-* rabbitmq
+```
 
 ---
 
-# PostgreSQL
-
-## Base de datos
-
-
-academic_platform
-
-
-## Usuario
-
-
-postgres
-
-
-## Contraseña
-
-
-postgres
-
-## Tablas iniciales
-
-* subjects
-* courses
-* resources
-* student_progress
-* activity_log
-
----
-
-# RabbitMQ
-
-## Acceso al panel web
+# Acceso RabbitMQ
 
 Abrir en navegador:
 
-
+```text
 http://localhost:15672
-
+```
 
 ## Credenciales
 
 Usuario:
+
+```text
 guest
+```
 
 Contraseña:
+
+```text
 guest
-
-
----
-
-# Configuración de RabbitMQ
-
-## Exchange
-academic.events.exchange
-
-
-## Queue
-academic.events.queue
-
-## Routing Key
-
-academic.resource.completed
+```
 
 ---
 
 # Flujo principal del sistema
 
+```text
 1. Estudiante completa recurso
-2. academic-service registra progreso
-3. academic-service publica evento RESOURCE_COMPLETED
+2. Java registra progreso
+3. Java publica evento RESOURCE_COMPLETED
 4. RabbitMQ recibe el mensaje
-5. recommendation-worker consume el evento
-6. recommendation-service genera recomendaciones
+5. Python consume el evento
+6. Python genera recomendaciones
+```
 
 ---
 
-# Estado actual de infraestructura
+# Colección Postman
 
-Actualmente la infraestructura contiene:
+La colección de pruebas se encuentra en:
 
-* PostgreSQL funcionando en Docker
-* RabbitMQ funcionando en Docker
-* Base de datos inicial configurada
-* Scripts SQL iniciales
-* Docker Compose configurado
+```text
+postman/collection.json
+```
 
-# Comandos útiles
+Incluye endpoints para:
 
-## Levantar contenedores
-docker compose up -d
-
-## Detener contenedores
-docker compose down
-
-## Ver contenedores activos
-docker ps
-
-## Ver logs PostgreSQL
-docker logs postgres
-
-## Ver logs RabbitMQ
-docker logs rabbitmq
+- Health Check
+- Subjects
+- Complete Resource
+- Recommendations
 
 ---
 
+# Documentación adicional
+
+## Arquitectura
+
+```text
+docs/architecture.md
+```
+
+---
+
+## Flujo distribuido
+
+```text
+docs/demo-flow.md
+```
+
+
+
+
+---
+
+# Estado actual
+
+Actualmente el proyecto cuenta con:
+
+- Infraestructura Docker funcional
+- PostgreSQL funcional
+- RabbitMQ funcional
+- Base de datos inicial
+- Arquitectura documentada
+- Flujo distribuido documentado
+- Colección Postman
+- Configuración inicial distribuida
+
+---
+
+# Objetivos distribuidos demostrados
+
+El proyecto demuestra:
+
+- Arquitectura distribuida
+- Comunicación síncrona y asíncrona
+- Integración entre tecnologías
+- Uso de sistemas de colas
+- Uso de hilos
+- Microservicios
+- Contenedores Docker
+- Procesamiento desacoplado
