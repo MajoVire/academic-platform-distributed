@@ -1,3 +1,4 @@
+from datetime import datetime
 from pydantic import BaseModel
 from typing import List
 
@@ -23,3 +24,13 @@ class GenerateRecommendationRequest(BaseModel):
 class GenerateRecommendationResponse(BaseModel):
     studentId: int
     generatedRecommendation: Recommendation
+
+
+class ResourceCompletedEvent(BaseModel):
+    eventType: str
+    studentId: int
+    subjectId: int
+    courseId: int
+    resourceId: int
+    resourceTitle: str
+    completedAt: datetime
