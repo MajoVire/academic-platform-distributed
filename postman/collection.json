@@ -1,0 +1,95 @@
+{
+	"info": {
+		"_postman_id": "4c1b994c-876b-4898-9b77-99d8cea8931f",
+		"name": "Academic Platform Distributed",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "49586311",
+		"_collection_link": "https://karen-siguencia-9137277.postman.co/workspace/KAREN-ESTEFANIA-SIGUENCIA-MEDIN~7e9bcd2c-fdac-4b8e-838d-11251dfd1973/collection/49586311-4c1b994c-876b-4898-9b77-99d8cea8931f?action=share&source=collection_link&creator=49586311"
+	},
+	"item": [
+		{
+			"name": "Health Check",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/health",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"health"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Subjects",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/subjects",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"subjects"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Complete Resource",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/students/1/resources/1/complete",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"students",
+						"1",
+						"resources",
+						"1",
+						"complete"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Recommendations",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/recommendations/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"recommendations",
+						"1"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
