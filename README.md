@@ -174,6 +174,8 @@ Responsabilidades principales:
 - Generar recomendaciones automáticas.
 - Desacoplar el procesamiento de recomendaciones del flujo principal del servicio académico.
 
+En esta primera entrega el worker registra la recomendación generada en logs. La recomendación consultable por REST sigue siendo la expuesta por `recommendation-service`.
+
 ---
 
 ## Comunicación REST
@@ -252,7 +254,7 @@ Evento esperado:
 
 ## Base de datos PostgreSQL
 
-La infraestructura contempla PostgreSQL como base de datos del proyecto.
+La infraestructura contempla PostgreSQL como base de datos real del dominio académico.
 
 Configuración base:
 
@@ -271,7 +273,7 @@ postgres
 ### Contraseña
 
 ```text
-postgres
+change_this_postgres_password
 ```
 
 Tablas principales consideradas:
@@ -282,7 +284,29 @@ Tablas principales consideradas:
 - `student_progress`
 - `activity_log`
 
-En la primera entrega, `academic-service` puede funcionar con datos en memoria. PostgreSQL queda preparado para una integración posterior o para el entorno completo gestionado por Docker Compose.
+`academic-service` usa PostgreSQL cuando se ejecuta con el perfil `postgres` dentro de Docker Compose.
+
+### Qué representa cada tabla
+
+| Tabla | Qué guarda | Comentario |
+|---|---|---|
+| `subjects` | Materias | Catálogo base de la plataforma |
+| `courses` | Cursos complementarios | Dependen de una materia |
+| `resources` | Recursos de aprendizaje | Dependen de un curso |
+| `student_progress` | Recursos completados por estudiante | Una fila por recurso completado |
+| `activity_log` | Bitácora académica | Guarda trazabilidad, incluyendo el hilo que procesó la acción |
+
+### Cambios conceptuales importantes
+
+- `subjects`, `courses` y `resources` dejaron de vivir solo en memoria y ahora forman parte del catálogo persistente.
+- `student_progress` ya no usa un campo `completed`; la existencia de la fila representa el recurso completado.
+- `activity_log` pasó de ser un registro genérico a una bitácora con más contexto:
+  - `resource_id`
+  - `resource_title`
+  - `thread_name`
+  - `completed_at`
+- `init.sql` crea el esquema inicial y carga el catálogo semilla.
+- El script de inicialización de PostgreSQL se ejecuta solo la primera vez que el volumen está vacío.
 
 ---
 
@@ -312,13 +336,14 @@ El flujo principal de la primera entrega es:
 
 ```text
 1. El estudiante completa un recurso.
-2. academic-service registra el progreso.
-3. academic-service ejecuta tareas concurrentes usando hilos.
-4. academic-service publica el evento RESOURCE_COMPLETED.
-5. RabbitMQ recibe el mensaje.
-6. recommendation-worker consume el evento.
-7. El servicio Python procesa la información.
-8. Se generan recomendaciones académicas.
+2. academic-service registra el progreso en PostgreSQL.
+3. academic-service registra la actividad académica en PostgreSQL.
+4. academic-service ejecuta tareas concurrentes usando hilos.
+5. academic-service publica el evento RESOURCE_COMPLETED.
+6. RabbitMQ recibe el mensaje.
+7. recommendation-worker consume el evento.
+8. El servicio Python procesa la información.
+9. Se generan recomendaciones académicas.
 ```
 
 Representación simplificada:
@@ -329,7 +354,8 @@ Cliente / Postman
     v
 POST /api/students/{studentId}/resources/{resourceId}/complete
     |
-    |-- Registra progreso del estudiante
+    |-- Registra progreso persistente en PostgreSQL
+    |-- Registra actividad académica persistente en PostgreSQL
     |-- Ejecuta tareas concurrentes usando hilos
     |-- Publica evento RESOURCE_COMPLETED en RabbitMQ
     |-- Permite consultar recomendaciones desde Python
@@ -376,14 +402,19 @@ Variables soportadas:
 | Variable | Default | Uso |
 |---|---|---|
 | `SERVER_PORT` | `8080` | Puerto del servicio Spring Boot |
-| `RABBITMQ_HOST` | `localhost` | Host de RabbitMQ |
+| `RABBITMQ_HOST` | `rabbitmq` | Host de RabbitMQ |
 | `RABBITMQ_PORT` | `5672` | Puerto de RabbitMQ |
 | `RABBITMQ_USERNAME` | `guest` | Usuario de RabbitMQ |
-| `RABBITMQ_PASSWORD` | `guest` | Contraseña de RabbitMQ |
+| `RABBITMQ_PASSWORD` | `change_this_rabbitmq_password` | Contraseña de RabbitMQ |
 | `ACADEMIC_EVENTS_EXCHANGE` | `academic.events.exchange` | Exchange para eventos académicos |
 | `ACADEMIC_EVENTS_QUEUE` | `academic.events.queue` | Queue para eventos académicos |
 | `ACADEMIC_RESOURCE_COMPLETED_ROUTING_KEY` | `academic.resource.completed` | Routing key del evento de completado |
-| `RECOMMENDATION_SERVICE_URL` | `http://localhost:8000` | URL del servicio Python de recomendaciones |
+| `RECOMMENDATION_SERVICE_URL` | `http://recommendation-service:8000` | URL del servicio Python de recomendaciones |
+| `POSTGRES_DB` | `academic_platform` | Nombre de la base académica |
+| `POSTGRES_USER` | `postgres` | Usuario de PostgreSQL |
+| `POSTGRES_PASSWORD` | `change_this_postgres_password` | Contraseña de PostgreSQL |
+| `POSTGRES_HOST` | `postgres` | Host de PostgreSQL en Docker Compose |
+| `POSTGRES_HOST_PORT` | `5432` | Puerto del host para PostgreSQL en Docker Compose |
 
 Para integración con Docker Compose, la configuración habitual es:
 
@@ -392,9 +423,45 @@ SERVER_PORT=8080
 RABBITMQ_HOST=rabbitmq
 RABBITMQ_PORT=5672
 RABBITMQ_USERNAME=guest
-RABBITMQ_PASSWORD=guest
+RABBITMQ_PASSWORD=change_this_rabbitmq_password
 RECOMMENDATION_SERVICE_URL=http://recommendation-service:8000
+POSTGRES_DB=academic_platform
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=change_this_postgres_password
+POSTGRES_HOST=postgres
+POSTGRES_HOST_PORT=5432
 ```
+
+---
+
+## Persistencia en academic-service
+
+El servicio Java persiste en PostgreSQL cuando corre con el perfil `postgres`.
+
+La estructura de datos queda organizada así:
+
+- `subjects`: materias del catálogo académico.
+- `courses`: cursos complementarios asociados a una materia.
+- `resources`: recursos de aprendizaje asociados a un curso.
+- `student_progress`: progreso real del estudiante, una fila por recurso completado.
+- `activity_log`: historial de actividad académica y trazabilidad del flujo.
+
+### Qué cambió respecto a la versión en memoria
+
+- El catálogo ya no depende solo de estructuras internas de Java.
+- El progreso persiste entre reinicios.
+- La actividad queda registrada con contexto adicional para auditoría.
+- `activity_log` conserva el recurso, el hilo y el instante del completado.
+
+### Modelo de tablas
+
+| Tabla | Función | Observación |
+|---|---|---|
+| `subjects` | Materias | Tabla maestra |
+| `courses` | Cursos complementarios | Relación con `subjects` |
+| `resources` | Recursos de aprendizaje | Relación con `courses` |
+| `student_progress` | Recursos completados | Una fila = un completado |
+| `activity_log` | Bitácora de actividad | Incluye `thread_name` y `resource_title` |
 
 ---
 
@@ -415,7 +482,13 @@ cd academic-platform-distributed
 ### 2. Levantar la infraestructura
 
 ```bash
-docker compose up -d
+docker compose up --build -d
+```
+
+Si el puerto `5432` del host ya está ocupado, puedes usar:
+
+```bash
+POSTGRES_HOST_PORT=5433 docker compose up --build -d
 ```
 
 ### 3. Verificar contenedores
@@ -467,7 +540,7 @@ Credenciales por defecto:
 
 ```text
 Usuario: guest
-Contraseña: guest
+Contraseña: change_this_rabbitmq_password
 ```
 
 ---
@@ -484,11 +557,34 @@ Incluye pruebas para:
 
 - Health check.
 - Consulta de materias.
-- Consulta de cursos.
-- Consulta de recursos.
+- Consulta de cursos por materia.
+- Consulta de recursos por curso.
 - Registro de recurso completado.
 - Consulta de progreso.
 - Consulta de recomendaciones.
+- Health check de `recommendation-service`.
+- Consulta de recomendaciones en `recommendation-service`.
+
+Variables de la colección:
+
+- `academic_base_url`
+- `recommendation_base_url`
+- `student_id`
+- `subject_id`
+- `course_id`
+- `resource_id`
+
+Orden sugerido para la demo en Postman:
+
+1. `Academic Service > Health Check`
+2. `Academic Service > Get Subjects`
+3. `Academic Service > Get Courses By Subject`
+4. `Academic Service > Get Resources By Course`
+5. `Academic Service > Complete Resource`
+6. `Academic Service > Get Progress`
+7. `Academic Service > Get Recommendations`
+8. `Recommendation Service > Health Check`
+9. `Recommendation Service > Get Recommendations By Student`
 
 ---
 
@@ -544,6 +640,13 @@ Actualmente el proyecto cuenta con:
 - Publicación del evento `RESOURCE_COMPLETED`.
 - Cliente REST hacia `recommendation-service`.
 
+Notas importantes del estado actual:
+
+- `academic-service` usa repositorios en memoria para catálogo y progreso.
+- PostgreSQL está levantado y documentado, pero todavía no está conectado como persistencia real del microservicio.
+- El worker consume `RESOURCE_COMPLETED` y genera la recomendación en logs.
+- La respuesta REST de recomendaciones sigue saliendo desde `recommendation-service`.
+
 ---
 
 ## Notas de integración
@@ -558,7 +661,7 @@ POST /api/students/{studentId}/resources/{resourceId}/complete
 - El servicio maneja de forma simple la ausencia temporal de RabbitMQ o del servicio Python para no detener toda la aplicación.
 - Los valores por defecto de `application.yml` son para pruebas locales.
 - En Docker Compose, las variables de entorno deben ajustarse según los nombres de los servicios.
-- El `Dockerfile` local de pruebas dentro de `academic-service/` no se versiona a propósito, salvo que el equipo decida incluirlo en una etapa posterior.
+- Si trabajas sobre un entorno local donde `5432` ya está ocupado, usa `POSTGRES_HOST_PORT`.
 
 ---
 

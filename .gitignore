@@ -40,13 +40,11 @@ replay_pid*
 # Local environment files
 .env
 .env.*
+!.env.example
 
 # OS files
 .DS_Store
 Thumbs.db
-
-# Local service Dockerfile used only for personal testing
-academic-service/Dockerfile
 
 # Context for Codex
 AGENTS.md

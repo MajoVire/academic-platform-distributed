@@ -2,14 +2,19 @@ import json
 import logging
 import os
 import sys
+import time
 from pathlib import Path
 
 import pika
 from pydantic import ValidationError
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-RECOMMENDATION_SERVICE_PATH = PROJECT_ROOT / "recommendation-service"
+WORKER_DIR = Path(__file__).resolve().parent
+LOCAL_SERVICE_PATH = WORKER_DIR.parent / "recommendation-service"
+CONTAINER_SERVICE_PATH = WORKER_DIR
+RECOMMENDATION_SERVICE_PATH = (
+    CONTAINER_SERVICE_PATH if (CONTAINER_SERVICE_PATH / "app").exists() else LOCAL_SERVICE_PATH
+)
 sys.path.append(str(RECOMMENDATION_SERVICE_PATH))
 
 from app.recommendation_logic import generate_recommendation
@@ -25,6 +30,8 @@ logger = logging.getLogger("recommendation-worker")
 
 
 RESOURCE_COMPLETED = "RESOURCE_COMPLETED"
+MAX_CONNECTION_ATTEMPTS = int(os.getenv("RABBITMQ_CONNECTION_ATTEMPTS", "5"))
+CONNECTION_RETRY_DELAY_SECONDS = int(os.getenv("RABBITMQ_CONNECTION_RETRY_DELAY_SECONDS", "5"))
 
 
 def get_config() -> dict:
@@ -33,9 +40,20 @@ def get_config() -> dict:
         "port": int(os.getenv("RABBITMQ_PORT", "5672")),
         "username": os.getenv("RABBITMQ_USERNAME", "guest"),
         "password": os.getenv("RABBITMQ_PASSWORD", "guest"),
-        "exchange": os.getenv("RABBITMQ_EXCHANGE", "academic.events.exchange"),
-        "queue": os.getenv("RABBITMQ_QUEUE", "academic.events.queue"),
-        "routing_key": os.getenv("RABBITMQ_ROUTING_KEY", "academic.resource.completed"),
+        # Prefer the academic-specific variable names defined by the project contract.
+        # Keep the older names as fallback so local runs remain compatible.
+        "exchange": os.getenv(
+            "ACADEMIC_EVENTS_EXCHANGE",
+            os.getenv("RABBITMQ_EXCHANGE", "academic.events.exchange")
+        ),
+        "queue": os.getenv(
+            "ACADEMIC_EVENTS_QUEUE",
+            os.getenv("RABBITMQ_QUEUE", "academic.events.queue")
+        ),
+        "routing_key": os.getenv(
+            "ACADEMIC_RESOURCE_COMPLETED_ROUTING_KEY",
+            os.getenv("RABBITMQ_ROUTING_KEY", "academic.resource.completed")
+        ),
     }
 
 
@@ -141,7 +159,29 @@ def on_message(channel, method, properties, body) -> None:
 
 def main() -> None:
     config = get_config()
-    connection = create_connection(config)
+
+    connection = None
+    last_error = None
+    for attempt in range(1, MAX_CONNECTION_ATTEMPTS + 1):
+        try:
+            connection = create_connection(config)
+            break
+        except pika.AMQPConnectionError as exception:
+            last_error = exception
+            logger.warning(
+                "Intento %s/%s fallido conectando a RabbitMQ: %s",
+                attempt,
+                MAX_CONNECTION_ATTEMPTS,
+                exception
+            )
+            if attempt < MAX_CONNECTION_ATTEMPTS:
+                time.sleep(CONNECTION_RETRY_DELAY_SECONDS)
+
+    if connection is None:
+        raise SystemExit(
+            f"No fue posible conectar con RabbitMQ tras {MAX_CONNECTION_ATTEMPTS} intentos: {last_error}"
+        )
+
     channel = connection.channel()
 
     configure_channel(channel, config)

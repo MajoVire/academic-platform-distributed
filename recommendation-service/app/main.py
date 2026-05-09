@@ -1,3 +1,5 @@
+import os
+
 from fastapi import FastAPI, Path, HTTPException
 
 from app.schemas import (
@@ -165,3 +167,14 @@ def generate_student_recommendation(
             status_code=500,
             detail="Error interno del servidor"
         )
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(
+        "app.main:app",
+        host="0.0.0.0",
+        port=int(os.getenv("PORT", "8000")),
+        reload=False
+    )

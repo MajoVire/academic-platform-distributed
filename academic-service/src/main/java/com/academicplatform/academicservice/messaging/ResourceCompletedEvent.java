@@ -2,6 +2,8 @@ package com.academicplatform.academicservice.messaging;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 public record ResourceCompletedEvent(
         String eventType,
         Long studentId,
@@ -9,6 +11,7 @@ public record ResourceCompletedEvent(
         Long courseId,
         Long resourceId,
         String resourceTitle,
+        @JsonFormat(shape = JsonFormat.Shape.STRING)
         LocalDateTime completedAt) {
 
     public static ResourceCompletedEvent of(

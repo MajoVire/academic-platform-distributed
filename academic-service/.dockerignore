@@ -1,0 +1,12 @@
+.git
+.agents
+.codex
+.idea
+.vscode
+*.log
+*.pyc
+__pycache__/
+**/__pycache__/
+target/
+.env
+.env.*

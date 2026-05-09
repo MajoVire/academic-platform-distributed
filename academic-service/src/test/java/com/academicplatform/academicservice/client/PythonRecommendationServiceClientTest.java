@@ -28,7 +28,7 @@ class PythonRecommendationServiceClientTest {
     @Test
     void shouldMapRecommendationsFromPythonService() {
         MockRestServiceServer server = MockRestServiceServer.bindTo(recommendationServiceRestTemplate).build();
-        server.expect(requestTo("http://localhost:8000/recommendations/1"))
+        server.expect(requestTo("http://recommendation-service:8000/recommendations/1"))
                 .andExpect(method(org.springframework.http.HttpMethod.GET))
                 .andRespond(withSuccess("""
                         {
@@ -53,7 +53,7 @@ class PythonRecommendationServiceClientTest {
     @Test
     void shouldReturnEmptyRecommendationsWhenPythonServiceFails() {
         MockRestServiceServer server = MockRestServiceServer.bindTo(recommendationServiceRestTemplate).build();
-        server.expect(requestTo("http://localhost:8000/recommendations/2"))
+        server.expect(requestTo("http://recommendation-service:8000/recommendations/2"))
                 .andExpect(method(org.springframework.http.HttpMethod.GET))
                 .andRespond(withServerError());
 

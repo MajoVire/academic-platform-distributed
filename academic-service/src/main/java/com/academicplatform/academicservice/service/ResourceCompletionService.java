@@ -64,8 +64,8 @@ public class ResourceCompletionService {
 
         CompletableFuture<ProgressUpdate> progressFuture = resourceFuture.thenApplyAsync(resource -> {
             logger.info("Updating progress for student {} on thread {}", studentId, Thread.currentThread().getName());
+            boolean newlyCompleted = studentProgressRepository.markResourceCompleted(studentId, resourceId, completedAt);
             StudentProgress progress = studentProgressRepository.getOrCreate(studentId);
-            boolean newlyCompleted = progress.markResourceCompleted(resourceId, completedAt);
             return new ProgressUpdate(progress, newlyCompleted);
         }, academicTaskExecutor);
 

@@ -7,12 +7,14 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.stereotype.Repository;
+import org.springframework.context.annotation.Profile;
 
 import com.academicplatform.academicservice.model.Course;
 import com.academicplatform.academicservice.model.Resource;
 import com.academicplatform.academicservice.model.Subject;
 
 @Repository
+@Profile("!postgres")
 public class InMemoryAcademicCatalogRepository implements AcademicCatalogRepository {
 
     private final Map<Long, Subject> subjects = new LinkedHashMap<>();

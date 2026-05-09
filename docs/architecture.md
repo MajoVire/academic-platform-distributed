@@ -23,6 +23,8 @@ Cliente/Postman
         v
 academic-service (Java)
         |
+        |---- PostgreSQL ----> PostgreSQL (persistencia académica)
+        |
         |---- REST ----> recommendation-service (Python)
         |
         |---- RabbitMQ -> recommendation-worker (Python)
@@ -42,6 +44,9 @@ Responsabilidades:
 - Consultar cursos
 - Consultar recursos académicos
 - Registrar progreso de estudiantes
+- Persistir el catálogo académico
+- Persistir el progreso estudiantil
+- Persistir la bitácora de actividad
 - Publicar eventos académicos
 
 Tecnologías:
@@ -118,7 +123,8 @@ Cuando un estudiante completa un recurso:
 2. academic-service publica un evento
 3. RabbitMQ almacena el mensaje
 4. recommendation-worker consume el evento
-5. recommendation-service genera recomendaciones
+5. recommendation-worker genera una recomendación a partir del evento recibido
+6. recommendation-service expone las recomendaciones consultables por REST
 
 ---
 
@@ -182,17 +188,41 @@ Tablas principales:
 - student_progress
 - activity_log
 
+En el estado actual, `academic-service` usa PostgreSQL como fuente real de persistencia cuando se ejecuta con el perfil `postgres`.
+
+### Esquema de persistencia
+
+| Tabla | Propósito | Detalle |
+|---|---|---|
+| `subjects` | Catálogo de materias | Materias académicas persistentes |
+| `courses` | Catálogo de cursos | Cursos asociados a una materia |
+| `resources` | Catálogo de recursos | Recursos asociados a un curso |
+| `student_progress` | Progreso del estudiante | Una fila por recurso completado |
+| `activity_log` | Bitácora de actividad | Evidencia del proceso y trazabilidad del hilo |
+
+### Cambios importantes del modelo
+
+- El catálogo ya no depende únicamente de estructuras en memoria.
+- `student_progress` usa una fila por recurso completado, sin un campo `completed` redundante.
+- `activity_log` conserva contexto adicional del evento:
+  - `resource_id`
+  - `resource_title`
+  - `thread_name`
+  - `completed_at`
+- `init.sql` carga el esquema y los datos semilla iniciales.
+
 ---
 
 # Flujo principal del sistema
 
 ```text
 1. Estudiante completa recurso
-2. Java registra progreso
-3. Java publica evento RESOURCE_COMPLETED
-4. RabbitMQ recibe el mensaje
-5. Python consume el evento
-6. Python genera recomendaciones
+2. Java persiste progreso en PostgreSQL
+3. Java registra actividad académica en PostgreSQL
+4. Java publica evento RESOURCE_COMPLETED
+5. RabbitMQ recibe el mensaje
+6. Python consume el evento
+7. Python genera recomendaciones
 ```
 
 ---

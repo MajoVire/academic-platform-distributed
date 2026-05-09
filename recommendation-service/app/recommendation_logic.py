@@ -5,12 +5,8 @@ from app.logger_config import logger
 def get_default_recommendations(student_id: int) -> list[Recommendation]:
     return [
         Recommendation(
-            title="Curso recomendado: Introducción a Docker",
-            reason="Este curso te ayudará a reforzar conceptos de contenedores y microservicios."
-        ),
-        Recommendation(
-            title="Curso recomendado: Comunicación con RabbitMQ",
-            reason="Este recurso complementa el aprendizaje sobre comunicación asíncrona."
+            title="Curso recomendado: Comunicación entre microservicios",
+            reason="Completaste un recurso relacionado con sistemas distribuidos."
         )
     ]
 

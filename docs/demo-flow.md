@@ -12,11 +12,12 @@ El objetivo principal es demostrar cómo múltiples tecnologías pueden trabajar
 
 ```text
 1. Estudiante completa recurso
-2. Java registra progreso
-3. Java publica evento RESOURCE_COMPLETED
-4. RabbitMQ recibe el mensaje
-5. Python consume el evento
-6. Python genera recomendaciones
+2. Java persiste progreso en PostgreSQL
+3. Java registra actividad académica en PostgreSQL
+4. Java publica evento RESOURCE_COMPLETED
+5. RabbitMQ recibe el mensaje
+6. Python consume el evento
+7. Python genera recomendaciones
 ```
 
 ---
@@ -52,16 +53,22 @@ Responsabilidades en este paso:
 
 - Validar la solicitud
 - Registrar el recurso como completado
-- Actualizar el progreso del estudiante
-- Registrar actividad académica
+- Persistir el progreso del estudiante en PostgreSQL
+- Persistir la actividad académica en PostgreSQL
 
 En esta etapa también se pueden utilizar hilos para ejecutar tareas concurrentes.
 
 Ejemplo:
 
-- Actualizar progreso
+- Persistir progreso
 - Registrar actividad
 - Publicar evento RabbitMQ
+
+Evidencia persistente que deja este paso:
+
+- Una fila en `student_progress`
+- Una fila en `activity_log`
+- Un evento `RESOURCE_COMPLETED` enviado a RabbitMQ
 
 ---
 
@@ -134,6 +141,7 @@ Responsabilidades:
 - Analizar comportamiento del estudiante
 
 El worker funciona de manera independiente al microservicio Java.
+En esta primera entrega, el worker genera la recomendación y la deja registrada en logs.
 
 ---
 
@@ -155,6 +163,10 @@ Ejemplo conceptual:
 ```text
 GET /recommendations/{studentId}
 ```
+
+En el estado actual del proyecto, esta consulta REST devuelve recomendaciones estáticas coherentes con la demo, mientras que el worker procesa el evento de forma asíncrona.
+
+La persistencia del catálogo y del progreso queda completamente en `academic-service`, mientras que `recommendation-service` sigue expuesto como API REST desacoplada.
 
 ---
 

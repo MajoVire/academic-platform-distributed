@@ -6,90 +6,215 @@
 		"_exporter_id": "49586311",
 		"_collection_link": "https://karen-siguencia-9137277.postman.co/workspace/KAREN-ESTEFANIA-SIGUENCIA-MEDIN~7e9bcd2c-fdac-4b8e-838d-11251dfd1973/collection/49586311-4c1b994c-876b-4898-9b77-99d8cea8931f?action=share&source=collection_link&creator=49586311"
 	},
+	"variable": [
+		{
+			"key": "academic_base_url",
+			"value": "http://localhost:8080"
+		},
+		{
+			"key": "recommendation_base_url",
+			"value": "http://localhost:8000"
+		},
+		{
+			"key": "student_id",
+			"value": "1"
+		},
+		{
+			"key": "subject_id",
+			"value": "1"
+		},
+		{
+			"key": "course_id",
+			"value": "1"
+		},
+		{
+			"key": "resource_id",
+			"value": "1"
+		}
+	],
 	"item": [
 		{
-			"name": "Health Check",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:8080/api/health",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"api",
-						"health"
-					]
+			"name": "Academic Service",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{academic_base_url}}/api/health",
+							"host": [
+								"{{academic_base_url}}"
+							],
+							"path": [
+								"api",
+								"health"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Subjects",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{academic_base_url}}/api/subjects",
+							"host": [
+								"{{academic_base_url}}"
+							],
+							"path": [
+								"api",
+								"subjects"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Courses By Subject",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{academic_base_url}}/api/subjects/{{subject_id}}/courses",
+							"host": [
+								"{{academic_base_url}}"
+							],
+							"path": [
+								"api",
+								"subjects",
+								"{{subject_id}}",
+								"courses"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Resources By Course",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{academic_base_url}}/api/courses/{{course_id}}/resources",
+							"host": [
+								"{{academic_base_url}}"
+							],
+							"path": [
+								"api",
+								"courses",
+								"{{course_id}}",
+								"resources"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Complete Resource",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{academic_base_url}}/api/students/{{student_id}}/resources/{{resource_id}}/complete",
+							"host": [
+								"{{academic_base_url}}"
+							],
+							"path": [
+								"api",
+								"students",
+								"{{student_id}}",
+								"resources",
+								"{{resource_id}}",
+								"complete"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Progress",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{academic_base_url}}/api/students/{{student_id}}/progress",
+							"host": [
+								"{{academic_base_url}}"
+							],
+							"path": [
+								"api",
+								"students",
+								"{{student_id}}",
+								"progress"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Recommendations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{academic_base_url}}/api/students/{{student_id}}/recommendations",
+							"host": [
+								"{{academic_base_url}}"
+							],
+							"path": [
+								"api",
+								"students",
+								"{{student_id}}",
+								"recommendations"
+							]
+						}
+					},
+					"response": []
 				}
-			},
-			"response": []
+			]
 		},
 		{
-			"name": "Get Subjects",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:8080/api/subjects",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"api",
-						"subjects"
-					]
+			"name": "Recommendation Service",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{recommendation_base_url}}/health",
+							"host": [
+								"{{recommendation_base_url}}"
+							],
+							"path": [
+								"health"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Recommendations By Student",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{recommendation_base_url}}/recommendations/{{student_id}}",
+							"host": [
+								"{{recommendation_base_url}}"
+							],
+							"path": [
+								"recommendations",
+								"{{student_id}}"
+							]
+						}
+					},
+					"response": []
 				}
-			},
-			"response": []
-		},
-		{
-			"name": "Complete Resource",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:8080/api/students/1/resources/1/complete",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"api",
-						"students",
-						"1",
-						"resources",
-						"1",
-						"complete"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Get Recommendations",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:8000/recommendations/1",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8000",
-					"path": [
-						"recommendations",
-						"1"
-					]
-				}
-			},
-			"response": []
+			]
 		}
 	]
 }
