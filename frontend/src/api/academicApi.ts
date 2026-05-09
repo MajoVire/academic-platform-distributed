@@ -2,8 +2,8 @@ import { apiClient } from './apiClient'
 import type {
   Course,
   Progress,
-  Recommendation,
   Resource,
+  StudentRecommendationsResponse,
   Subject,
 } from '../types/academic'
 
@@ -46,8 +46,8 @@ export async function getStudentProgress(
 
 export async function getStudentRecommendations(
   studentId: number,
-): Promise<Recommendation[]> {
-  const { data } = await apiClient.get<Recommendation[]>(
+): Promise<StudentRecommendationsResponse> {
+  const { data } = await apiClient.get<StudentRecommendationsResponse>(
     `/api/students/${studentId}/recommendations`,
   )
   return data
