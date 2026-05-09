@@ -28,9 +28,14 @@ export type Progress = {
 }
 
 export type Recommendation = {
-  id: number
-  studentId: number
-  resourceId: number
+  id?: number
+  studentId?: number
+  resourceId?: number
   title: string
-  reason?: string
+  reason: string
+}
+
+export type StudentRecommendationsResponse = {
+  studentId: number
+  recommendations: Recommendation[]
 }
