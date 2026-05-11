@@ -5,6 +5,31 @@ import type { Progress } from '../types/academic'
 import ProgressCircle from '../components/ui/ProgressCircle'
 import ProgressBar from '../components/ui/ProgressBar'
 
+// Ilustración Isométrica de Crecimiento y Métricas
+const IsometricProgressIllustration = () => (
+  <svg viewBox="0 0 200 160" className="w-36 h-28 select-none pointer-events-none drop-shadow-lg hidden sm:block overflow-visible">
+    <ellipse cx="100" cy="130" rx="60" ry="22" fill="#475569" fillOpacity="0.08" />
+
+    {/* Column 1 (Left, Short) */}
+    <g transform="translate(40, 65)">
+      <path d="M 10,20 L 25,12 L 40,20 L 25,28 Z" fill="#34d399" fillOpacity="0.8" />
+      <path d="M 10,20 L 25,28 L 25,60 L 10,52 Z" fill="#10b981" />
+      <path d="M 25,28 L 40,20 L 40,52 L 25,60 Z" fill="#059669" />
+    </g>
+
+    {/* Column 2 (Middle, Medium) */}
+    <g transform="translate(80, 45)">
+      <path d="M 10,20 L 25,12 L 40,20 L 25,28 Z" fill="#60a5fa" fillOpacity="0.8" />
+      <path d="M 10,20 L 25,28 L 25,80 L 10,72 Z" fill="#3b82f6" />
+      <path d="M 25,28 L 40,20 L 40,72 L 25,80 Z" fill="#1d4ed8" />
+    </g>
+
+    {/* Rising arrow/sparkle line */}
+    <path d="M 40,110 Q 75,80 105,62" fill="none" stroke="#6366f1" strokeWidth="2" strokeDasharray="3 3" />
+    <path d="M 105,62 L 99,64 L 103,69 Z" fill="#6366f1" />
+  </svg>
+)
+
 export function ProgressPage() {
   const { studentId } = useParams<{ studentId?: string }>()
   const [progress, setProgress] = useState<Progress | null>(null)
@@ -33,13 +58,18 @@ export function ProgressPage() {
 
   return (
     <div className="space-y-8 text-left">
-      <div>
-        <h1 className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">
-          Mi Progreso Académico
-        </h1>
-        <p className="mt-2 text-slate-500 dark:text-slate-400 text-sm">
-          Consulta las estadísticas del material que has completado y el porcentaje global de tu especialidad académica.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-3xl shadow-sm">
+        <div className="space-y-2">
+          <h1 className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">
+            Mi Progreso Académico
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400 text-sm max-w-xl">
+            Consulta las estadísticas del material que has completado y el porcentaje global de tu especialidad académica.
+          </p>
+        </div>
+        <div className="flex-shrink-0">
+          <IsometricProgressIllustration />
+        </div>
       </div>
 
       {error && (

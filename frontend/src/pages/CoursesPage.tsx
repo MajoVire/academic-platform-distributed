@@ -5,6 +5,17 @@ import type { Course, Subject } from '../types/academic'
 import CourseCard from '../components/ui/CourseCard'
 import { IoChevronBackOutline } from 'react-icons/io5'
 
+// Importación de imágenes de cursos desde assets
+import sistemasDistribuidosImg from '../assets/sistemasDistribuidos.png'
+import mensajeriaYColasImg from '../assets/mensajeriaYColas.png'
+import disenosoftwareImg from '../assets/disenosoftware.png'
+
+const courseImageMap: Record<number, string> = {
+  1: sistemasDistribuidosImg,
+  2: mensajeriaYColasImg,
+  3: disenosoftwareImg,
+}
+
 export function CoursesPage() {
   const { subjectId } = useParams<{ subjectId?: string }>()
   const [courses, setCourses] = useState<Course[]>([])
@@ -92,6 +103,7 @@ export function CoursesPage() {
               id={course.id}
               title={course.title}
               description={course.description || ''}
+              imageUrl={courseImageMap[course.id]}
               resourceCount={course.id === 1 ? 2 : course.id === 2 ? 2 : course.id === 3 ? 1 : undefined} // Contar semánticamente según init.sql
               to={`/courses/${course.id}/resources`}
             />

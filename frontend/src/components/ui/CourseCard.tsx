@@ -1,4 +1,5 @@
 import { Link } from 'react-router'
+import { useState } from 'react'
 
 interface CourseCardProps {
   id: number
@@ -18,14 +19,17 @@ export function CourseCard({
   resourceCount,
   to,
 }: CourseCardProps) {
+  const [imageError, setImageError] = useState(false)
+
   const cardContent = (
     <div className="group flex flex-col h-full bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-none hover:border-blue-500/50 dark:hover:border-blue-500/50 dark:hover:shadow-[0_0_20px_rgba(46,81,156,0.25)] transition-all duration-300 overflow-hidden">
       {/* Contenedor de Imagen (Espacio img) */}
       <div className="relative aspect-video w-full bg-slate-100 dark:bg-slate-900 overflow-hidden">
-        {imageUrl ? (
+        {imageUrl && !imageError ? (
           <img
             src={imageUrl}
             alt={title}
+            onError={() => setImageError(true)}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
         ) : (

@@ -5,6 +5,31 @@ import type { Resource } from '../types/academic'
 import ResourceCard from '../components/ui/ResourceCard'
 import { IoChevronBackOutline } from 'react-icons/io5'
 
+// Ilustración Isométrica de Recursos Académicos y Carpetas
+const IsometricResourcesIllustration = () => (
+  <svg viewBox="0 0 200 160" className="w-36 h-28 select-none pointer-events-none drop-shadow-lg hidden sm:block overflow-visible">
+    <ellipse cx="100" cy="130" rx="60" ry="22" fill="#475569" fillOpacity="0.08" />
+
+    {/* Carpeta Isométrica */}
+    <g transform="translate(60, 40)">
+      {/* Tapa trasera */}
+      <path d="M 10,40 L 40,25 L 70,40 L 70,80 L 10,80 Z" fill="#2563eb" fillOpacity="0.6" />
+      
+      {/* Documento 1 flotando */}
+      <path d="M 20,25 L 45,12 L 65,22 L 65,65 L 20,65 Z" fill="#ffffff" stroke="#cbd5e1" strokeWidth="0.8" />
+      <line x1="30" y1="28" x2="50" y2="18" stroke="#94a3b8" strokeWidth="1" />
+      <line x1="30" y1="36" x2="55" y2="24" stroke="#cbd5e1" strokeWidth="1" />
+
+      {/* Tapa delantera */}
+      <path d="M 5,45 L 35,30 L 45,35 L 75,50 L 75,85 L 5,85 Z" fill="#3b82f6" />
+    </g>
+
+    {/* Sparkles */}
+    <circle cx="50" cy="50" r="1.5" fill="#f59e0b" className="animate-pulse" />
+    <circle cx="150" cy="70" r="1.5" fill="#10b981" className="animate-pulse" />
+  </svg>
+)
+
 export function ResourcesPage() {
   const { courseId } = useParams<{ courseId?: string }>()
   const [resources, setResources] = useState<Resource[]>([])
@@ -96,13 +121,18 @@ export function ResourcesPage() {
         </Link>
       </div>
 
-      <div>
-        <h1 className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">
-          Recursos de Aprendizaje
-        </h1>
-        <p className="mt-2 text-slate-500 dark:text-slate-400 text-sm">
-          Completa los recursos de estudio para asimilar la información y desbloquear sugerencias inteligentes de cursos.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-3xl shadow-sm">
+        <div className="space-y-2">
+          <h1 className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">
+            Recursos de Aprendizaje
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400 text-sm max-w-xl">
+            Completa los recursos de estudio para asimilar la información y desbloquear sugerencias inteligentes de cursos.
+          </p>
+        </div>
+        <div className="flex-shrink-0">
+          <IsometricResourcesIllustration />
+        </div>
       </div>
 
       {successMsg && (
