@@ -1,10 +1,15 @@
 function SubjectsPage() {
   return (
-    <section>
-      <h1 className="text-2xl font-semibold">Materias</h1>
-      <p className="mt-2 text-slate-600">Placeholder de materias.</p>
-    </section>
-  )
+    <div>
+      <h1>Materias Académicas</h1>
+
+      <ul>
+        <li>Programación Web</li>
+        <li>Sistemas Distribuidos</li>
+        <li>Inteligencia Artificial</li>
+      </ul>
+    </div>
+  );
 }
 
-export default SubjectsPage
+export default SubjectsPage;
