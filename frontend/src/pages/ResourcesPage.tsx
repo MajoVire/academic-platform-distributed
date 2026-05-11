@@ -36,7 +36,14 @@ function ResourcesPage() {
     setResources(mockResources);
   }, []);
 
-  const handleCompleteResource = (resourceId: number) => {
+  const handleCompleteResource = async (resourceId: number) => {
+  try {
+    const studentId = 1;
+
+    console.log(
+      `POST /api/students/${studentId}/resources/${resourceId}/complete`
+    );
+
     setResources((prevResources) =>
       prevResources.map((resource) =>
         resource.id === resourceId
@@ -45,8 +52,11 @@ function ResourcesPage() {
       )
     );
 
-    console.log(`Recurso ${resourceId} completado`);
-  };
+    alert("Recurso marcado como completado");
+  } catch (error) {
+    console.error("Error al completar recurso:", error);
+  }
+};
 
   return (
     <div style={{ padding: "2rem" }}>
@@ -84,13 +94,13 @@ function ResourcesPage() {
             </p>
 
             <button
-              onClick={() => handleCompleteResource(resource.id)}
-              disabled={resource.completed}
-            >
-              {resource.completed
-                ? "Recurso completado"
-                : "Marcar como completado"}
-            </button>
+            onClick={() => handleCompleteResource(resource.id)}
+            disabled={resource.completed}
+          >
+            {resource.completed
+              ? "Recurso completado"
+              : "Marcar como completado"}
+          </button>
           </div>
         ))}
       </div>
