@@ -11,7 +11,7 @@ const navigationItems = [
   { label: 'Cursos', to: '/courses' },
   { label: 'Recursos', to: '/resources' },
   { label: 'Progreso', to: '/progress' },
-  { label: 'Recomendaciones', to: '/recommendations' },
+  { label: 'Recomendaciones', to: '/students/1/recommendations' },
 ]
 
 function MainLayout({ children }: MainLayoutProps) {
