@@ -1,39 +1,24 @@
 import type { ReactNode } from 'react'
-import { NavLink } from 'react-router'
+import Navbar from '../components/ui/Navbar'
 
 type MainLayoutProps = {
   children: ReactNode
 }
 
-const navigationItems = [
-  { label: 'Inicio', to: '/' },
-  { label: 'Materias', to: '/subjects' },
-  { label: 'Cursos', to: '/courses' },
-  { label: 'Recursos', to: '/resources' },
-  { label: 'Progreso', to: '/progress' },
-  { label: 'Recomendaciones', to: '/recommendations' },
-]
-
 function MainLayout({ children }: MainLayoutProps) {
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      <header className="border-b border-slate-200 bg-white">
-        <nav className="mx-auto flex max-w-6xl flex-wrap gap-3 px-4 py-4">
-          {navigationItems.map((item) => (
-            <NavLink
-              className={({ isActive }) =>
-                isActive ? 'font-semibold text-slate-950' : 'text-slate-600'
-              }
-              key={item.to}
-              to={item.to}
-            >
-              {item.label}
-            </NavLink>
-          ))}
-        </nav>
-      </header>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col transition-colors duration-300">
+      {/* Componente Navbar adaptativo (Mobile-First) */}
+      <Navbar />
 
-      <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
+      {/* 
+          Contenedor principal de contenidos.
+          * md:py-10 - padding vertical normal en escritorio.
+          * pb-24 - padding inferior en móvil para evitar que el navbar fijo cubra el contenido.
+      */}
+      <main className="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-10 pb-24 md:pb-10 transition-all">
+        {children}
+      </main>
     </div>
   )
 }
