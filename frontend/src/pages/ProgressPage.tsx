@@ -1,9 +1,56 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router'
-import { getStudentProgress } from '../api/academicApi'
-import type { Progress } from '../types/academic'
+import {
+  getCourseResources,
+  getStudentProgress,
+  getSubjectCourses,
+  getSubjects,
+} from '../api/academicApi'
+import type { Course, Resource } from '../types/academic'
 import ProgressCircle from '../components/ui/ProgressCircle'
 import ProgressBar from '../components/ui/ProgressBar'
+
+type ProgressViewModel = {
+  studentId: number
+  completedResources: number
+  totalResources: number
+  percentage: number
+  lastCompletedAt?: string
+}
+
+async function getCatalogResourceCount(): Promise<number> {
+  const subjects = await getSubjects()
+
+  const coursesBySubject = await Promise.all(
+    subjects.map(async (subject) => {
+      try {
+        return await getSubjectCourses(subject.id)
+      } catch (error) {
+        console.warn(`No se pudieron cargar los cursos de la materia ${subject.id}:`, error)
+        return [] as Course[]
+      }
+    }),
+  )
+
+  const allCourses = coursesBySubject.flat()
+
+  const resourcesByCourse = await Promise.all(
+    allCourses.map(async (course) => {
+      try {
+        return await getCourseResources(course.id)
+      } catch (error) {
+        console.warn(`No se pudieron cargar los recursos del curso ${course.id}:`, error)
+        return [] as Resource[]
+      }
+    }),
+  )
+
+  const uniqueResourceIds = new Set(
+    resourcesByCourse.flat().map((resource) => resource.id),
+  )
+
+  return uniqueResourceIds.size
+}
 
 // Ilustración Isométrica de Crecimiento y Métricas
 const IsometricProgressIllustration = () => (
@@ -32,7 +79,7 @@ const IsometricProgressIllustration = () => (
 
 export function ProgressPage() {
   const { studentId } = useParams<{ studentId?: string }>()
-  const [progress, setProgress] = useState<Progress | null>(null)
+  const [progress, setProgress] = useState<ProgressViewModel | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -42,8 +89,24 @@ export function ProgressPage() {
     const fetchProgress = async () => {
       try {
         setLoading(true)
-        const data = await getStudentProgress(defaultStudentId)
-        setProgress(data)
+        const [studentProgress, catalogResourceCount] = await Promise.all([
+          getStudentProgress(defaultStudentId),
+          getCatalogResourceCount(),
+        ])
+
+        const completedResources = studentProgress.totalCompletedResources
+        const percentage =
+          catalogResourceCount > 0
+            ? Math.round((completedResources / catalogResourceCount) * 100)
+            : 0
+
+        setProgress({
+          studentId: studentProgress.studentId,
+          completedResources,
+          totalResources: catalogResourceCount,
+          percentage,
+          lastCompletedAt: studentProgress.lastCompletedAt,
+        })
         setError(null)
       } catch (err) {
         console.error('Error fetching progress:', err)
@@ -114,6 +177,12 @@ export function ProgressPage() {
                 <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                   Actualmente has finalizado <span className="font-bold text-blue-600 dark:text-blue-400">{progress.completedResources}</span> de un total de <span className="font-bold text-slate-700 dark:text-slate-300">{progress.totalResources}</span> recursos de aprendizaje asignados a tu plan de estudio de Computación.
                 </p>
+                {progress.lastCompletedAt && (
+                  <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">
+                    Última actividad registrada:{' '}
+                    {new Date(progress.lastCompletedAt).toLocaleString('es-EC')}
+                  </p>
+                )}
               </div>
 
               {/* Barra de progreso lineal */}
