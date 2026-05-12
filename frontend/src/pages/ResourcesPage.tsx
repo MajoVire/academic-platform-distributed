@@ -67,7 +67,7 @@ export function ResourcesPage() {
           try {
             const res = await getCourseResources(cId)
             allResources = [...allResources, ...res]
-          } catch (e) {
+          } catch {
             // Ignorar errores parciales de cursos inexistentes
           }
         }
