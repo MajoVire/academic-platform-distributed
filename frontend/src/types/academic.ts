@@ -28,6 +28,13 @@ export type Progress = {
   completedResourceIds?: number[]
 }
 
+export type StudentProgressApiResponse = {
+  studentId: number
+  completedResourceIds: number[]
+  totalCompletedResources: number
+  lastCompletedAt?: string
+}
+
 export type Recommendation = {
   id?: number
   studentId?: number
