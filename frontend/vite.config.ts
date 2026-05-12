@@ -16,6 +16,7 @@ export default defineConfig({
         theme_color: '#ffffff',
         background_color: '#ffffff',
         display: 'standalone',
+
        icons: [
   {
     src: '/icons.svg',
@@ -34,6 +35,7 @@ export default defineConfig({
   },
       workbox: {
         globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
+        maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
       },
     }),
   ],
