@@ -1,1 +1,25 @@
 @import "tailwindcss";
+
+/* 
+  Sobrescribir el selector de modo oscuro por defecto en Tailwind v4 
+  para habilitar el cambio manual basado en la clase `.dark` agregada a <html>
+*/
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* 
+    Sobrescribir la paleta de azul de Tailwind v4 con un tono azul denim corporativo, 
+    menos chillón/brillante, con excelente contraste y máxima elegancia para entornos académicos.
+  */
+  --color-blue-50: #f4f7fc;
+  --color-blue-100: #e8eef8;
+  --color-blue-200: #ccd9f0;
+  --color-blue-300: #a2bae4;
+  --color-blue-400: #7196d4;
+  --color-blue-500: #426fc0; /* Azul principal suave */
+  --color-blue-600: #2e519c; /* Azul corporativo académico, menos brillante y muy distinguido */
+  --color-blue-700: #25407d; /* Azul denim profundo */
+  --color-blue-800: #1c2e5a;
+  --color-blue-900: #172449;
+  --color-blue-950: #0f152b;
+}

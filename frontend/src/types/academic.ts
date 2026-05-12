@@ -25,6 +25,7 @@ export type Progress = {
   completedResources: number
   totalResources: number
   percentage: number
+  completedResourceIds?: number[]
 }
 
 export type Recommendation = {
