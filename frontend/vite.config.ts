@@ -18,17 +18,20 @@ export default defineConfig({
         display: 'standalone',
        icons: [
   {
-    src: '/favicon.svg',
+    src: '/icons.svg',
     sizes: '192x192',
     type: 'image/svg+xml',
   },
   {
-    src: '/favicon.svg',
+    src: '/icons.svg',
     sizes: '512x512',
     type: 'image/svg+xml',
   },
 ],
       },
+       devOptions: {
+    enabled: true,
+  },
       workbox: {
         globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
       },
