@@ -9,6 +9,8 @@ import pika
 from pydantic import ValidationError
 
 
+# Se define la ruta del proyecto para poder importar la lógica y los schemas
+# del recommendation-service, tanto si se ejecuta localmente como dentro de Docker.
 WORKER_DIR = Path(__file__).resolve().parent
 LOCAL_SERVICE_PATH = WORKER_DIR.parent / "recommendation-service"
 CONTAINER_SERVICE_PATH = WORKER_DIR
@@ -21,6 +23,7 @@ from app.recommendation_logic import generate_recommendation
 from app.schemas import ResourceCompletedEvent
 
 
+# Configuración básica de logs para ver en consola qué hace el worker.
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s"
@@ -30,18 +33,26 @@ logger = logging.getLogger("recommendation-worker")
 
 
 RESOURCE_COMPLETED = "RESOURCE_COMPLETED"
+
+# Cantidad de intentos y tiempo de espera para conectarse a RabbitMQ.
+# Esto ayuda porque RabbitMQ puede tardar unos segundos en estar listo.
 MAX_CONNECTION_ATTEMPTS = int(os.getenv("RABBITMQ_CONNECTION_ATTEMPTS", "5"))
 CONNECTION_RETRY_DELAY_SECONDS = int(os.getenv("RABBITMQ_CONNECTION_RETRY_DELAY_SECONDS", "5"))
 
 
 def get_config() -> dict:
+    """
+    Obtiene la configuración necesaria para conectarse a RabbitMQ.
+    Usa variables de entorno si existen; si no, usa valores por defecto.
+    """
     return {
         "host": os.getenv("RABBITMQ_HOST", "localhost"),
         "port": int(os.getenv("RABBITMQ_PORT", "5672")),
         "username": os.getenv("RABBITMQ_USERNAME", "guest"),
         "password": os.getenv("RABBITMQ_PASSWORD", "guest"),
-        # Prefer the academic-specific variable names defined by the project contract.
-        # Keep the older names as fallback so local runs remain compatible.
+
+        # Estos nombres coinciden con los definidos en el contrato del proyecto.
+        # También se dejan nombres antiguos como respaldo para pruebas locales.
         "exchange": os.getenv(
             "ACADEMIC_EVENTS_EXCHANGE",
             os.getenv("RABBITMQ_EXCHANGE", "academic.events.exchange")
@@ -58,6 +69,9 @@ def get_config() -> dict:
 
 
 def create_connection(config: dict) -> pika.BlockingConnection:
+    """
+    Crea la conexión con RabbitMQ usando las credenciales configuradas.
+    """
     credentials = pika.PlainCredentials(
         config["username"],
         config["password"]
@@ -79,6 +93,10 @@ def create_connection(config: dict) -> pika.BlockingConnection:
 
 
 def configure_channel(channel: pika.adapters.blocking_connection.BlockingChannel, config: dict) -> None:
+    """
+    Declara el exchange, la cola y la unión entre ambos.
+    Esto permite que el worker reciba eventos con la routing key esperada.
+    """
     channel.exchange_declare(
         exchange=config["exchange"],
         exchange_type="topic",
@@ -96,6 +114,7 @@ def configure_channel(channel: pika.adapters.blocking_connection.BlockingChannel
         routing_key=config["routing_key"]
     )
 
+    # Procesa un mensaje a la vez para evitar tomar varios mensajes sin terminar.
     channel.basic_qos(prefetch_count=1)
 
     logger.info(
@@ -107,6 +126,10 @@ def configure_channel(channel: pika.adapters.blocking_connection.BlockingChannel
 
 
 def handle_message(body: bytes) -> None:
+    """
+    Procesa el contenido de un mensaje recibido desde RabbitMQ.
+    Valida el JSON, verifica el tipo de evento y genera la recomendación.
+    """
     try:
         payload = json.loads(body.decode("utf-8"))
     except json.JSONDecodeError as exception:
@@ -121,6 +144,7 @@ def handle_message(body: bytes) -> None:
 
     logger.info("Evento recibido: %s", event.eventType)
 
+    # El worker solo procesa eventos de recurso completado.
     if event.eventType != RESOURCE_COMPLETED:
         logger.warning(
             "Mensaje descartado: eventType no soportado '%s'",
@@ -135,8 +159,11 @@ def handle_message(body: bytes) -> None:
         event.resourceId
     )
 
+    # Se genera una recomendación usando el título del recurso completado.
     recommendation = generate_recommendation(event.resourceTitle)
 
+    # En esta versión, la recomendación se muestra en logs.
+    # Todavía no se guarda en base de datos.
     logger.info(
         "Recomendación generada para estudiante %s: %s - %s",
         event.studentId,
@@ -146,6 +173,11 @@ def handle_message(body: bytes) -> None:
 
 
 def on_message(channel, method, properties, body) -> None:
+    """
+    Callback que RabbitMQ ejecuta cada vez que llega un mensaje a la cola.
+    Si el mensaje se procesa correctamente, se confirma con basic_ack.
+    Si ocurre un error inesperado, se rechaza con basic_nack.
+    """
     try:
         handle_message(body)
         channel.basic_ack(delivery_tag=method.delivery_tag)
@@ -158,10 +190,16 @@ def on_message(channel, method, properties, body) -> None:
 
 
 def main() -> None:
+    """
+    Punto de entrada del worker.
+    Se conecta a RabbitMQ, configura la cola y queda escuchando mensajes.
+    """
     config = get_config()
 
     connection = None
     last_error = None
+
+    # Se intenta conectar varias veces porque RabbitMQ puede tardar en iniciar.
     for attempt in range(1, MAX_CONNECTION_ATTEMPTS + 1):
         try:
             connection = create_connection(config)
@@ -186,12 +224,14 @@ def main() -> None:
 
     configure_channel(channel, config)
 
+    # Se indica a RabbitMQ qué función debe ejecutarse cuando llegue un mensaje.
     channel.basic_consume(
         queue=config["queue"],
         on_message_callback=on_message
     )
 
     try:
+        # El worker queda ejecutándose continuamente esperando mensajes.
         channel.start_consuming()
     except KeyboardInterrupt:
         logger.info("Worker detenido manualmente")
