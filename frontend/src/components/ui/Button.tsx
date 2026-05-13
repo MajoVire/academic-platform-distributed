@@ -19,7 +19,7 @@ export function Button({
   ...props
 }: ButtonProps) {
   // Clases CSS base comunes de diseño y comportamiento (hover, active, focus, transiciones)
-  const baseClasses = 'inline-flex items-center justify-center font-bold rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500/40 disabled:opacity-50 disabled:cursor-not-allowed select-none cursor-pointer hover:scale-[1.01] active:scale-[0.99]'
+  const baseClasses = 'inline-flex items-center justify-center font-bold rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/40 disabled:opacity-50 disabled:cursor-not-allowed select-none cursor-pointer hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.96]'
 
   // Paletas de color según la variante solicitada
   const variantClasses = {

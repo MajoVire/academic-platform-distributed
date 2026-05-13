@@ -25,7 +25,7 @@ export function CourseCard({
 
   // El diseño central de la tarjeta (imagen + detalles)
   const cardContent = (
-    <div className="group flex flex-col h-full bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-none hover:border-blue-500/50 dark:hover:border-blue-500/50 dark:hover:shadow-[0_0_20px_rgba(46,81,156,0.25)] transition-all duration-300 overflow-hidden">
+    <div className="group flex flex-col h-full bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/60 dark:border-slate-700/80 shadow-sm hover:shadow-xl hover:-translate-y-1.5 hover:border-blue-500/40 dark:hover:border-blue-400/40 dark:hover:shadow-[0_12px_30px_rgba(66,111,192,0.12)] transition-all duration-300 ease-out overflow-hidden">
       {/* Contenedor de Imagen (Espacio de portada del curso) */}
       <div className="relative aspect-video w-full bg-slate-100 dark:bg-slate-900 overflow-hidden">
         {imageUrl && !imageError ? (

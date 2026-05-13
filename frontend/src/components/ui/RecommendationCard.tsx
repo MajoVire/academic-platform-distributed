@@ -9,7 +9,7 @@ interface RecommendationCardProps {
 export function RecommendationCard({ title, reason }: RecommendationCardProps) {
   return (
     // Diseño con fondo en degradado moderno (de azul a índigo) y efecto de hover con brillo neón azul
-    <div className="group flex flex-col p-5 bg-gradient-to-br from-blue-50/40 to-indigo-50/20 dark:from-blue-900/40 dark:to-slate-800 rounded-2xl border border-blue-100 dark:border-blue-800 shadow-none hover:border-blue-500/40 dark:hover:border-blue-500/30 dark:hover:shadow-[0_0_25px_rgba(46,81,156,0.35)] transition-all duration-300 text-left">
+    <div className="group flex flex-col p-5 bg-gradient-to-br from-blue-50/40 to-indigo-50/20 dark:from-blue-900/40 dark:to-slate-800 rounded-2xl border border-blue-100 dark:border-blue-800/80 shadow-sm hover:shadow-xl hover:-translate-y-1.5 hover:border-blue-500/40 dark:hover:border-blue-400/40 dark:hover:shadow-[0_12px_30px_rgba(66,111,192,0.12)] transition-all duration-300 ease-out text-left">
       <div className="flex items-start gap-4">
         {/* Icono de Chispas con animación de pulsación constante */}
         <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center animate-[pulse_3s_infinite]">

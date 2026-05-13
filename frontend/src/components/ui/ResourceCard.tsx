@@ -49,10 +49,10 @@ export function ResourceCard({
   return (
     // Si ya está completado, se pinta con un sutil borde verde y fondo verdoso para indicar éxito.
     // De lo contrario, se pinta normal y resalta en azul al pasar el mouse por encima.
-    <div className={`group flex flex-col justify-between h-full p-5 bg-white dark:bg-slate-800 rounded-2xl border transition-all duration-300 text-left ${
+    <div className={`group flex flex-col justify-between h-full p-5 bg-white dark:bg-slate-800 rounded-2xl border transition-all duration-300 ease-out text-left ${
       isCompleted 
-        ? 'border-emerald-500/30 bg-emerald-50/10 dark:bg-emerald-950/20' 
-        : 'border-slate-200 dark:border-slate-700 hover:border-blue-500/50 dark:hover:shadow-[0_0_20px_rgba(46,81,156,0.25)]'
+        ? 'border-emerald-500/30 bg-emerald-50/10 dark:bg-emerald-950/20 shadow-sm hover:shadow-md hover:-translate-y-1' 
+        : 'border-slate-200/60 dark:border-slate-700/80 shadow-sm hover:shadow-xl hover:-translate-y-1.5 hover:border-blue-500/40 dark:hover:border-blue-400/40 dark:hover:shadow-[0_12px_30px_rgba(66,111,192,0.12)]'
     }`}>
       <div>
         <div className="flex items-center justify-between">

@@ -17,7 +17,7 @@ export function SubjectCard({
 }: SubjectCardProps) {
   const cardContent = (
     // Estructura visual de la tarjeta con icono superior, título grande, descripción y contador de cursos abajo.
-    <div className="group flex flex-col justify-between h-full p-6 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-blue-500/50 dark:hover:border-blue-500/50 dark:hover:shadow-[0_0_20px_rgba(46,81,156,0.25)] transition-all duration-300">
+    <div className="group flex flex-col justify-between h-full p-6 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/60 dark:border-slate-700/80 shadow-sm hover:shadow-xl hover:-translate-y-1.5 hover:border-blue-500/40 dark:hover:border-blue-400/40 dark:hover:shadow-[0_12px_30px_rgba(66,111,192,0.12)] transition-all duration-300 ease-out">
       <div className="text-left">
         {/* Encabezado con Icono de Libro SVG, que se agranda en hover */}
         <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-950/60 flex items-center justify-center text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform duration-300">
