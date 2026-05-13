@@ -6,9 +6,16 @@ import {
   IoArrowForward, 
   IoChevronForwardOutline,
 } from 'react-icons/io5'
-import Button from '../components/ui/Button'
 
-// Componente para la Ilustración Isométrica de Servidores y Nube
+
+
+// =========================================================================
+// PÁGINA DE INICIO (HOME)
+// Esta es la pantalla de bienvenida de la aplicación. Muestra una breve
+// introducción al sistema distribuido y accesos directos a las secciones.
+// =========================================================================
+
+// Componente para la Ilustración Isométrica de Servidores y Nube (Hecha puramente en SVG)
 const IsometricIllustration = () => (
   <svg viewBox="0 0 400 320" className="w-full h-full max-h-[320px] select-none pointer-events-none drop-shadow-2xl overflow-visible">
     <defs>
@@ -155,6 +162,9 @@ const IsometricIllustration = () => (
   </svg>
 )
 
+// Este es el componente principal de la página de inicio.
+// Renderiza el banner del "Hero" (bienvenida) y las tres tarjetas con los pilares tecnológicos
+// de nuestro sistema (Materias, Concurrencia de hilos de Spring Boot, y Motor de Recomendación IA de Python).
 export function HomePage() {
   return (
     <div className="space-y-16 py-4 md:py-8 text-left">

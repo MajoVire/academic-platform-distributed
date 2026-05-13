@@ -6,9 +6,12 @@ import RecommendationsPage from '../pages/RecommendationsPage'
 import ResourcesPage from '../pages/ResourcesPage'
 import SubjectsPage from '../pages/SubjectsPage'
 
+// Este archivo es el "mapa de carreteras" de la aplicación.
+// Define qué componente/página renderizar según la URL que visite el usuario.
+// Todas las páginas están envueltas en <MainLayout> para mantener el diseño visual (menú de navegación, fondo, etc.) coherente.
 export const appRoutes = [
   {
-    path: '/',
+    path: '/', // Página de inicio / Landing page
     element: (
       <MainLayout>
         <HomePage />
@@ -16,7 +19,7 @@ export const appRoutes = [
     ),
   },
   {
-    path: '/subjects',
+    path: '/subjects', // Catálogo general de materias
     element: (
       <MainLayout>
         <SubjectsPage />
@@ -24,7 +27,7 @@ export const appRoutes = [
     ),
   },
   {
-    path: '/courses',
+    path: '/courses', // Todos los cursos en general
     element: (
       <MainLayout>
         <CoursesPage />
@@ -32,7 +35,7 @@ export const appRoutes = [
     ),
   },
   {
-    path: '/subjects/:subjectId/courses',
+    path: '/subjects/:subjectId/courses', // Cursos filtrados por una materia en específico
     element: (
       <MainLayout>
         <CoursesPage />
@@ -40,7 +43,7 @@ export const appRoutes = [
     ),
   },
   {
-    path: '/resources',
+    path: '/resources', // Todos los recursos en general
     element: (
       <MainLayout>
         <ResourcesPage />
@@ -48,7 +51,7 @@ export const appRoutes = [
     ),
   },
   {
-    path: '/courses/:courseId/resources',
+    path: '/courses/:courseId/resources', // Recursos asociados a un curso en específico
     element: (
       <MainLayout>
         <ResourcesPage />
@@ -56,7 +59,7 @@ export const appRoutes = [
     ),
   },
   {
-    path: '/progress',
+    path: '/progress', // Progreso académico del estudiante actual (usa id=1 por defecto)
     element: (
       <MainLayout>
         <ProgressPage />
@@ -64,7 +67,7 @@ export const appRoutes = [
     ),
   },
   {
-    path: '/students/:studentId/progress',
+    path: '/students/:studentId/progress', // Progreso académico para un estudiante específico
     element: (
       <MainLayout>
         <ProgressPage />
@@ -72,7 +75,7 @@ export const appRoutes = [
     ),
   },
   {
-    path: '/recommendations',
+    path: '/recommendations', // Recomendaciones inteligentes del estudiante actual (usa id=1 por defecto)
     element: (
       <MainLayout>
         <RecommendationsPage />
@@ -80,11 +83,11 @@ export const appRoutes = [
     ),
   },
   {
-    path: '/students/:studentId/recommendations',
+    path: '/students/:studentId/recommendations', // Recomendaciones inteligentes para un estudiante específico
     element: (
       <MainLayout>
         <RecommendationsPage />
       </MainLayout>
     ),
   },
-]
+]

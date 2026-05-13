@@ -3,13 +3,19 @@ import { getSubjects } from '../api/academicApi'
 import type { Subject } from '../types/academic'
 import SubjectCard from '../components/ui/SubjectCard'
 
+// =========================================================================
+// PÁGINA DE MATERIAS
+// Esta página carga el catálogo completo de materias del backend (Spring Boot)
+// y las muestra usando la tarjeta interactiva <SubjectCard>.
+// =========================================================================
+
 // Ilustración Isométrica de Librería Académica
 const IsometricLibraryIllustration = () => (
   <svg viewBox="0 0 200 160" className="w-36 h-28 select-none pointer-events-none drop-shadow-lg hidden sm:block overflow-visible">
     <defs>
       <linearGradient id="bookGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.4" stopColorOpacity="1" />
-        <stop offset="100%" stopColor="#1d4ed8" stopOpacity="0.1" stopColorOpacity="1" />
+        <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.4" />
+        <stop offset="100%" stopColor="#1d4ed8" stopOpacity="0.1" />
       </linearGradient>
     </defs>
     <ellipse cx="100" cy="130" rx="60" ry="22" fill="#475569" fillOpacity="0.08" />
@@ -42,14 +48,17 @@ const IsometricLibraryIllustration = () => (
 )
 
 export function SubjectsPage() {
+  // Estados para almacenar las materias cargadas, el estado de carga y posibles errores de red.
   const [subjects, setSubjects] = useState<Subject[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // useEffect se dispara al cargar la página por primera vez.
   useEffect(() => {
     const fetchSubjects = async () => {
       try {
         setLoading(true)
+        // Llamada asíncrona a nuestra función de API para obtener la lista de materias de la base de datos
         const data = await getSubjects()
         setSubjects(data)
         setError(null)
@@ -57,12 +66,13 @@ export function SubjectsPage() {
         console.error('Error fetching subjects:', err)
         setError('No se pudo conectar con el servidor académico. Asegúrate de que el backend esté ejecutándose.')
       } finally {
-        setLoading(false)
+        setLoading(false) // Finaliza el estado de carga
       }
     }
 
     fetchSubjects()
   }, [])
+
 
   return (
     <div className="space-y-8 text-left">

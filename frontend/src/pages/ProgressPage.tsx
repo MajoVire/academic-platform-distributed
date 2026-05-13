@@ -10,6 +10,12 @@ import type { Course, Resource } from '../types/academic'
 import ProgressCircle from '../components/ui/ProgressCircle'
 import ProgressBar from '../components/ui/ProgressBar'
 
+// =========================================================================
+// PÁGINA DE PROGRESO DEL ESTUDIANTE
+// Muestra el porcentaje total completado y detalles individuales del avance
+// del estudiante 1. Es el panel de métricas y estadísticas principales.
+// =========================================================================
+
 type ProgressViewModel = {
   studentId: number
   completedResources: number
@@ -78,13 +84,18 @@ const IsometricProgressIllustration = () => (
 )
 
 export function ProgressPage() {
+  // Obtenemos de forma opcional el id del estudiante desde la URL si existiera
   const { studentId } = useParams<{ studentId?: string }>()
+  
+  // Estados para almacenar la información del progreso, la carga y posibles errores
   const [progress, setProgress] = useState<ProgressViewModel | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // Si no se especifica un estudiante en la URL, usamos el estudiante 1 por defecto
   const defaultStudentId = studentId ? parseInt(studentId, 10) : 1
 
+  // Al cargar la página, llamamos a la API para traer las métricas del estudiante
   useEffect(() => {
     const fetchProgress = async () => {
       try {
@@ -118,6 +129,7 @@ export function ProgressPage() {
 
     fetchProgress()
   }, [defaultStudentId])
+
 
   return (
     <div className="space-y-8 text-left">

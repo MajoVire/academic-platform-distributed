@@ -5,6 +5,13 @@ import type { Resource } from '../types/academic'
 import ResourceCard from '../components/ui/ResourceCard'
 import { IoChevronBackOutline } from 'react-icons/io5'
 
+// =========================================================================
+// PÁGINA DE RECURSOS DEL CURSO
+// Aquí el estudiante ve todos los materiales de un curso (ej. videos, lecturas).
+// Al pulsar "Completar recurso", se guarda su progreso en segundo plano,
+// viajando por la arquitectura concurrente de Spring Boot.
+// =========================================================================
+
 // Ilustración Isométrica de Recursos Académicos y Carpetas
 const IsometricResourcesIllustration = () => (
   <svg viewBox="0 0 200 160" className="w-36 h-28 select-none pointer-events-none drop-shadow-lg hidden sm:block overflow-visible">
@@ -31,22 +38,26 @@ const IsometricResourcesIllustration = () => (
 )
 
 export function ResourcesPage() {
+  // Extraemos el ID del curso actual de la URL
   const { courseId } = useParams<{ courseId?: string }>()
+
+  // Estados locales para los recursos, los IDs completados, estados de carga y peticiones de red pendientes
   const [resources, setResources] = useState<Resource[]>([])
-  const [completedIds, setCompletedIds] = useState<number[]>([])
+  const [completedIds, setCompletedIds] = useState<number[]>([]) // Lista de IDs de recursos ya estudiados
   const [loading, setLoading] = useState(true)
-  const [pendingId, setPendingId] = useState<number | null>(null)
+  const [pendingId, setPendingId] = useState<number | null>(null) // ID del recurso que se está completando en este momento
   const [error, setError] = useState<string | null>(null)
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
 
-  const studentId = 1 // ID del estudiante por defecto en la demo
+  const studentId = 1 // Simulamos que somos el estudiante con ID 1 para esta demo académica
 
+  // Función para descargar los recursos de la materia y el progreso del estudiante actual
   const fetchResourcesAndProgress = async () => {
     try {
       setLoading(true)
       setError(null)
 
-      // 1. Obtener progreso de completados
+      // 1. Obtener la lista de recursos que este estudiante ya completó de la base de datos
       const progressData = await getStudentProgress(studentId)
       if (progressData && progressData.completedResourceIds) {
         setCompletedIds(progressData.completedResourceIds)
@@ -54,7 +65,7 @@ export function ResourcesPage() {
         setCompletedIds([])
       }
 
-      // 2. Obtener recursos del curso o generales
+      // 2. Cargar los recursos específicos de este curso
       if (courseId) {
         const cId = parseInt(courseId, 10)
         const resourcesData = await getCourseResources(cId)
@@ -81,24 +92,29 @@ export function ResourcesPage() {
     }
   }
 
+  // Recarga los recursos cada vez que el usuario cambie de curso
   useEffect(() => {
     fetchResourcesAndProgress()
   }, [courseId])
 
+  // Método estrella: Se ejecuta al pulsar el botón "Completar recurso".
+  // Envía la petición a la API asíncrona de Spring Boot, que procesa la finalización
+  // concurrentemente con hilos de ejecución de base de datos y publica un evento en RabbitMQ
+  // para que FastAPI de Python actualice sus recomendaciones.
   const handleMarkCompleted = async (resourceId: number, resourceTitle: string) => {
     try {
-      setPendingId(resourceId)
+      setPendingId(resourceId) // Activa el icono de "Procesando..." para este recurso específico
       setError(null)
       setSuccessMsg(null)
 
       // Ejecutar llamada al backend
       await completeResource(studentId, resourceId)
 
-      // Actualizar estado local inmediato
+      // Actualizar estado local inmediato para pintar la tarjeta de verde de forma instantánea
       setCompletedIds((prev) => [...prev, resourceId])
       setSuccessMsg(`¡Excelente! Completaste "${resourceTitle}". Se ha registrado en la base de datos y enviado a la cola de recomendaciones de forma asíncrona.`)
       
-      // Auto-ocultar mensaje de éxito
+      // Auto-ocultar mensaje de éxito a los 7 segundos
       setTimeout(() => setSuccessMsg(null), 7000)
     } catch (err) {
       console.error('Error completing resource:', err)
@@ -107,6 +123,7 @@ export function ResourcesPage() {
       setPendingId(null)
     }
   }
+
 
   return (
     <div className="space-y-8 text-left">

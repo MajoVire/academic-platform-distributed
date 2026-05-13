@@ -5,6 +5,13 @@ import type { Recommendation } from '../types/academic'
 import RecommendationCard from '../components/ui/RecommendationCard'
 import { IoSparklesOutline } from 'react-icons/io5'
 
+// =========================================================================
+// PÁGINA DE RECOMENDACIONES DE INTELIGENCIA ARTIFICIAL
+// Esta página consume la API de Python FastAPI. El motor inteligente de Python
+// procesa las finalizaciones asíncronas de recursos del estudiante,
+// y a través de un algoritmo genera sugerencias oportunas y personalizadas.
+// =========================================================================
+
 // Ilustración Isométrica de Cerebro IA / Núcleo de Computo
 const IsometricAIIllustration = () => (
   <svg viewBox="0 0 200 160" className="w-36 h-28 select-none pointer-events-none drop-shadow-lg hidden sm:block overflow-visible">
@@ -35,18 +42,26 @@ const IsometricAIIllustration = () => (
 )
 
 export function RecommendationsPage() {
+  // Obtenemos de manera opcional el ID del estudiante desde la URL si existiera
   const { studentId } = useParams<{ studentId?: string }>()
+
+  // Estados locales para almacenar la lista de recomendaciones sugeridas por la IA,
+  // la pantalla de carga (skeleton) y posibles errores de red con el backend de Python FastAPI.
   const [recommendations, setRecommendations] = useState<Recommendation[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // Por defecto usamos el estudiante con ID 1 en la simulación académica
   const defaultStudentId = studentId ? parseInt(studentId, 10) : 1
 
+  // Al cargar el componente o cambiar de estudiante, llamamos a la API de FastAPI (Python)
   useEffect(() => {
     const fetchRecommendations = async () => {
       try {
         setLoading(true)
         const response = await getStudentRecommendations(defaultStudentId)
+        
+        // Si el motor de Python devolvió recomendaciones válidas, las guardamos en el estado
         if (response && response.recommendations) {
           setRecommendations(response.recommendations)
         } else {
@@ -63,6 +78,7 @@ export function RecommendationsPage() {
 
     fetchRecommendations()
   }, [defaultStudentId])
+
 
   return (
     <div className="space-y-8 text-left">
