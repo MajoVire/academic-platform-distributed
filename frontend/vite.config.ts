@@ -16,23 +16,22 @@ export default defineConfig({
         theme_color: '#ffffff',
         background_color: '#ffffff',
         display: 'standalone',
-
-       icons: [
-  {
-    src: '/icons.svg',
-    sizes: '192x192',
-    type: 'image/svg+xml',
-  },
-  {
-    src: '/icons.svg',
-    sizes: '512x512',
-    type: 'image/svg+xml',
-  },
-],
+        icons: [
+          {
+            src: '/icons.svg',
+            sizes: '192x192',
+            type: 'image/svg+xml',
+          },
+          {
+            src: '/icons.svg',
+            sizes: '512x512',
+            type: 'image/svg+xml',
+          },
+        ],
       },
-       devOptions: {
-    enabled: true,
-  },
+      devOptions: {
+        enabled: true,
+      },
       workbox: {
         globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
         maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
@@ -42,7 +41,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
+        target: 'http://localhost:3000',
         changeOrigin: true,
       },
     },

@@ -8,7 +8,7 @@ La primera entrega se enfoca en demostrar conceptos de Sistemas Distribuidos med
 
 - Uso de hilos.
 - Uso de sistemas de colas.
-- Comunicación entre Java y Python.
+- Comunicación entre Java, Python y Node.js.
 - Comunicación síncrona mediante REST.
 - Comunicación asíncrona mediante RabbitMQ.
 - Ejecución mediante contenedores Docker.
@@ -20,7 +20,7 @@ La primera entrega se enfoca en demostrar conceptos de Sistemas Distribuidos med
 
 Este repositorio agrupa una solución académica distribuida compuesta por varios servicios.
 
-La plataforma permite que un estudiante consulte contenido académico complementario y marque recursos como completados. A partir de esta acción, el sistema registra el progreso, publica un evento en RabbitMQ y permite generar recomendaciones académicas desde un servicio Python.
+La plataforma permite que un estudiante consulte contenido académico complementario y marque recursos como completados. El frontend consume `web-gateway-service`, que reenvía las solicitudes a `academic-service`. A partir de esta acción, el sistema registra el progreso, publica un evento en RabbitMQ y permite generar recomendaciones académicas desde un servicio Python.
 
 ---
 
@@ -31,7 +31,7 @@ Implementar una arquitectura distribuida que demuestre:
 - Uso de microservicios.
 - Comunicación REST.
 - Comunicación mediante colas.
-- Integración entre servicios desarrollados en Java y Python.
+- Integración entre servicios desarrollados en Java, Python y Node.js.
 - Uso de hilos para procesamiento concurrente.
 - Procesamiento asíncrono mediante eventos.
 - Despliegue local mediante Docker y Docker Compose.
@@ -42,10 +42,12 @@ Implementar una arquitectura distribuida que demuestre:
 ## Arquitectura general
 
 ```text
-Cliente / Postman
+Frontend / Cliente / Postman
         |
         v
-academic-service (Java + Spring Boot)
+web-gateway-service (Node.js + Express + TypeScript)
+        |
+        |---- REST ----> academic-service (Java + Spring Boot)
         |
         |---- REST ----> recommendation-service (Python + FastAPI)
         |
@@ -56,6 +58,7 @@ El sistema demuestra dos formas principales de comunicación distribuida:
 
 ```text
 Comunicación síncrona:
+frontend ── REST ──► web-gateway-service ── REST ──► academic-service
 academic-service ── REST ──► recommendation-service
 
 Comunicación asíncrona:
@@ -70,6 +73,9 @@ academic-service ── RabbitMQ ──► recommendation-worker
 
 - Java 17
 - Spring Boot
+- Node.js
+- Express
+- TypeScript
 - Python
 - FastAPI
 
@@ -102,6 +108,8 @@ El repositorio está organizado por componentes:
 
 ```text
 academic-platform-distributed/
+├── frontend/
+├── web-gateway-service/
 ├── academic-service/
 ├── recommendation-service/
 ├── recommendation-worker/
@@ -111,6 +119,29 @@ academic-platform-distributed/
 ├── docker-compose.yml
 └── README.md
 ```
+
+---
+
+## web-gateway-service
+
+`web-gateway-service` es la puerta de entrada HTTP para el frontend.
+
+Está desarrollado en **Node.js + Express + TypeScript** y funciona como API Gateway / Backend for Frontend.
+
+Responsabilidades principales:
+
+- Recibir peticiones del frontend.
+- Reenviar las rutas académicas al servicio Java.
+- Mantener desacoplado al frontend de los servicios internos.
+- Exponer un único punto de entrada para la demo web.
+
+Comunicación esperada:
+
+```text
+frontend ---> web-gateway-service ---> academic-service
+```
+
+El gateway no reemplaza la lógica interna de `academic-service`; solo centraliza el acceso externo.
 
 ---
 
@@ -133,6 +164,8 @@ Responsabilidades principales:
 
 Para la primera entrega, este servicio utiliza repositorios en memoria, lo que permite avanzar sin depender directamente de PostgreSQL durante la etapa inicial.
 
+En la arquitectura web actual, `academic-service` recibe las solicitudes reenviadas por `web-gateway-service`.
+
 ---
 
 ## recommendation-service
@@ -150,6 +183,7 @@ Responsabilidades principales:
 Comunicación esperada:
 
 ```text
+web-gateway-service ---> academic-service
 academic-service ---> recommendation-service
 ```
 
@@ -310,6 +344,26 @@ Tablas principales consideradas:
 
 ---
 
+## Endpoints de web-gateway-service
+
+Base path:
+
+```text
+/api
+```
+
+| Método | Endpoint | Descripción |
+|---|---|---|
+| GET | `/api/health` | Health check del gateway y del servicio académico |
+| GET | `/api/subjects` | Lista todas las materias |
+| GET | `/api/subjects/{subjectId}/courses` | Lista los cursos de una materia |
+| GET | `/api/courses/{courseId}/resources` | Lista los recursos de un curso |
+| POST | `/api/students/{studentId}/resources/{resourceId}/complete` | Registra un recurso como completado |
+| GET | `/api/students/{studentId}/progress` | Consulta el progreso del estudiante |
+| GET | `/api/students/{studentId}/recommendations` | Consulta recomendaciones desde el servicio Python |
+
+---
+
 ## Endpoints de academic-service
 
 Base path:
@@ -336,20 +390,25 @@ El flujo principal de la primera entrega es:
 
 ```text
 1. El estudiante completa un recurso.
-2. academic-service registra el progreso en PostgreSQL.
-3. academic-service registra la actividad académica en PostgreSQL.
-4. academic-service ejecuta tareas concurrentes usando hilos.
-5. academic-service publica el evento RESOURCE_COMPLETED.
-6. RabbitMQ recibe el mensaje.
-7. recommendation-worker consume el evento.
-8. El servicio Python procesa la información.
-9. Se generan recomendaciones académicas.
+2. Frontend envía la acción al web-gateway-service.
+3. web-gateway-service reenvía la solicitud a academic-service.
+4. academic-service registra el progreso en PostgreSQL.
+5. academic-service registra la actividad académica en PostgreSQL.
+6. academic-service ejecuta tareas concurrentes usando hilos.
+7. academic-service publica el evento RESOURCE_COMPLETED.
+8. RabbitMQ recibe el mensaje.
+9. recommendation-worker consume el evento.
+10. El servicio Python procesa la información.
+11. Se generan recomendaciones académicas.
 ```
 
 Representación simplificada:
 
 ```text
-Cliente / Postman
+Frontend / Postman
+    |
+    v
+web-gateway-service
     |
     v
 POST /api/students/{studentId}/resources/{resourceId}/complete
@@ -371,6 +430,8 @@ Servicios configurados:
 
 | Servicio | Puerto |
 |---|---|
+| web-gateway-service | 3000 |
+| academic-service | 8080 |
 | PostgreSQL | 5432 |
 | RabbitMQ | 5672 |
 | RabbitMQ Management | 15672 |
@@ -378,6 +439,7 @@ Servicios configurados:
 Servicios esperados en la integración:
 
 ```text
+web-gateway-service
 academic-service
 recommendation-service
 recommendation-worker
@@ -430,6 +492,32 @@ POSTGRES_USER=postgres
 POSTGRES_PASSWORD=change_this_postgres_password
 POSTGRES_HOST=postgres
 POSTGRES_HOST_PORT=5432
+```
+
+---
+
+## Configuración de web-gateway-service
+
+El gateway se configura con variables simples para enrutar al backend Java.
+
+Variables soportadas:
+
+| Variable | Default | Uso |
+|---|---|---|
+| `WEB_GATEWAY_PORT` | `3000` | Puerto del gateway |
+| `ACADEMIC_SERVICE_URL` | `http://academic-service:8080` | URL del servicio Java |
+| `GATEWAY_CORS_ORIGIN` | `http://localhost:5173` | Origen permitido para el frontend |
+| `REQUEST_TIMEOUT_MS` | `5000` | Timeout de las peticiones hacia academic-service |
+| `NODE_ENV` | `development` | Modo de ejecución |
+
+Para integración con Docker Compose, la configuración habitual es:
+
+```text
+WEB_GATEWAY_PORT=3000
+ACADEMIC_SERVICE_URL=http://academic-service:8080
+GATEWAY_CORS_ORIGIN=http://localhost:5173
+REQUEST_TIMEOUT_MS=5000
+NODE_ENV=development
 ```
 
 ---
@@ -555,6 +643,7 @@ postman/collection.json
 
 Incluye pruebas para:
 
+- Gateway web.
 - Health check.
 - Consulta de materias.
 - Consulta de cursos por materia.
@@ -567,6 +656,7 @@ Incluye pruebas para:
 
 Variables de la colección:
 
+- `gateway_base_url`
 - `academic_base_url`
 - `recommendation_base_url`
 - `student_id`
@@ -576,15 +666,16 @@ Variables de la colección:
 
 Orden sugerido para la demo en Postman:
 
-1. `Academic Service > Health Check`
-2. `Academic Service > Get Subjects`
-3. `Academic Service > Get Courses By Subject`
-4. `Academic Service > Get Resources By Course`
-5. `Academic Service > Complete Resource`
-6. `Academic Service > Get Progress`
-7. `Academic Service > Get Recommendations`
-8. `Recommendation Service > Health Check`
-9. `Recommendation Service > Get Recommendations By Student`
+1. `Web Gateway > Health Check`
+2. `Web Gateway > Get Subjects`
+3. `Web Gateway > Get Courses By Subject`
+4. `Web Gateway > Get Resources By Course`
+5. `Web Gateway > Complete Resource`
+6. `Web Gateway > Get Progress`
+7. `Web Gateway > Get Recommendations`
+8. `Academic Service > Health Check`
+9. `Recommendation Service > Health Check`
+10. `Recommendation Service > Get Recommendations By Student`
 
 ---
 
@@ -634,6 +725,8 @@ Actualmente el proyecto cuenta con:
 - Arquitectura documentada.
 - Flujo distribuido documentado.
 - Colección Postman.
+- `web-gateway-service` implementado.
+- Frontend configurado para consumir el gateway.
 - Microservicio `academic-service` implementado.
 - Endpoints académicos básicos.
 - Uso de hilos en el flujo de completado de recursos.
@@ -644,6 +737,7 @@ Notas importantes del estado actual:
 
 - `academic-service` usa repositorios en memoria para catálogo y progreso.
 - PostgreSQL está levantado y documentado, pero todavía no está conectado como persistencia real del microservicio.
+- `web-gateway-service` funciona como fachada HTTP para el frontend.
 - El worker consume `RESOURCE_COMPLETED` y genera la recomendación en logs.
 - La respuesta REST de recomendaciones sigue saliendo desde `recommendation-service`.
 
@@ -652,6 +746,7 @@ Notas importantes del estado actual:
 ## Notas de integración
 
 - `academic-service` no requiere PostgreSQL para esta primera entrega, ya que usa repositorios en memoria.
+- El frontend debe consumir `web-gateway-service` y no `academic-service` directamente.
 - El flujo principal usa la ruta:
 
 ```text
@@ -697,7 +792,7 @@ El proyecto demuestra:
 - Arquitectura distribuida.
 - Comunicación síncrona mediante REST.
 - Comunicación asíncrona mediante RabbitMQ.
-- Integración entre Java y Python.
+- Integración entre Java, Python y Node.js.
 - Uso de sistemas de colas.
 - Uso de hilos.
 - Microservicios.

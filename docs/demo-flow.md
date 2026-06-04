@@ -12,12 +12,14 @@ El objetivo principal es demostrar cómo múltiples tecnologías pueden trabajar
 
 ```text
 1. Estudiante completa recurso
-2. Java persiste progreso en PostgreSQL
-3. Java registra actividad académica en PostgreSQL
-4. Java publica evento RESOURCE_COMPLETED
-5. RabbitMQ recibe el mensaje
-6. Python consume el evento
-7. Python genera recomendaciones
+2. Frontend envía la acción al web-gateway-service
+3. web-gateway-service reenvía la solicitud a academic-service
+4. Java persiste progreso en PostgreSQL
+5. Java registra actividad académica en PostgreSQL
+6. Java publica evento RESOURCE_COMPLETED
+7. RabbitMQ recibe el mensaje
+8. Python consume el evento
+9. Python genera recomendaciones
 ```
 
 ---
@@ -35,7 +37,7 @@ Ejemplo:
 - Práctica
 - Material complementario
 
-El cliente realiza una solicitud HTTP al microservicio Java.
+El cliente realiza una solicitud HTTP al gateway.
 
 Ejemplo conceptual:
 
@@ -45,7 +47,21 @@ POST /api/students/{studentId}/resources/{resourceId}/complete
 
 ---
 
-## 2. academic-service registra el progreso
+## 2. web-gateway-service reenvía la solicitud
+
+El frontend no habla directamente con `academic-service`; primero pasa por `web-gateway-service`.
+
+El microservicio `web-gateway-service`, desarrollado en Node.js + Express + TypeScript, recibe la solicitud del frontend y la reenvía al backend Java.
+
+Responsabilidades en este paso:
+
+- Validar la solicitud.
+- Reenviar la petición a `academic-service`.
+- Mantener al frontend desacoplado de los servicios internos.
+
+---
+
+## 3. academic-service registra el progreso
 
 El microservicio `academic-service`, desarrollado en Java con Spring Boot, recibe la solicitud.
 
@@ -72,7 +88,7 @@ Evidencia persistente que deja este paso:
 
 ---
 
-## 3. academic-service publica un evento
+## 4. academic-service publica un evento
 
 Después de registrar el progreso, el microservicio Java publica un evento en RabbitMQ.
 
@@ -116,7 +132,7 @@ academic.resource.completed
 
 ---
 
-## 4. RabbitMQ recibe el mensaje
+## 5. RabbitMQ recibe el mensaje
 
 RabbitMQ actúa como sistema de colas y middleware de mensajería.
 
@@ -130,7 +146,7 @@ Esto desacopla los servicios y permite comunicación asíncrona.
 
 ---
 
-## 5. recommendation-worker consume el evento
+## 6. recommendation-worker consume el evento
 
 El microservicio `recommendation-worker`, desarrollado en Python, consume el mensaje desde RabbitMQ.
 
@@ -145,7 +161,7 @@ En esta primera entrega, el worker genera la recomendación y la deja registrada
 
 ---
 
-## 6. recommendation-service genera recomendaciones
+## 7. recommendation-service genera recomendaciones
 
 Finalmente, el sistema Python genera recomendaciones académicas para el estudiante.
 
@@ -174,6 +190,7 @@ La persistencia del catálogo y del progreso queda completamente en `academic-se
 
 | Componente | Tecnología |
 |---|---|
+| web-gateway-service | Node.js + Express + TypeScript |
 | academic-service | Java + Spring Boot |
 | recommendation-service | Python + FastAPI |
 | recommendation-worker | Python |
@@ -190,7 +207,7 @@ El flujo demuestra:
 - Uso de microservicios
 - Comunicación REST
 - Comunicación mediante colas
-- Comunicación entre Java y Python
+- Comunicación entre Java, Python y Node.js
 - Procesamiento asíncrono
 - Desacoplamiento de servicios
 - Arquitectura distribuida

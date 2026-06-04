@@ -43,6 +43,16 @@ export default defineConfig([
 ])
 ```
 
+## API Gateway en desarrollo
+
+El frontend consume el backend a través de `web-gateway-service`.
+
+Variables útiles:
+
+- `VITE_API_BASE_URL=http://localhost:3000`
+
+En desarrollo, Vite también reenvía `/api` hacia `http://localhost:3000`.
+
 You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
 ```js
