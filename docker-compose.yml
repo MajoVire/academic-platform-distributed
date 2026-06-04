@@ -8,7 +8,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_this_postgres_password}
     ports:
-      - "${POSTGRES_HOST_PORT:-5432}:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
@@ -65,6 +65,24 @@ services:
         condition: service_healthy
       recommendation-service:
         condition: service_healthy
+
+  web-gateway-service:
+    build:
+      context: ./web-gateway-service
+      dockerfile: Dockerfile
+    container_name: web-gateway-service
+    restart: always
+    environment:
+      WEB_GATEWAY_PORT: ${WEB_GATEWAY_PORT:-3000}
+      ACADEMIC_SERVICE_URL: ${ACADEMIC_SERVICE_URL:-http://academic-service:8080}
+      GATEWAY_CORS_ORIGIN: ${GATEWAY_CORS_ORIGIN:-http://localhost:5173}
+      REQUEST_TIMEOUT_MS: ${REQUEST_TIMEOUT_MS:-5000}
+      NODE_ENV: ${NODE_ENV:-development}
+    ports:
+      - "3000:3000"
+    depends_on:
+      academic-service:
+        condition: service_started
 
   recommendation-service:
     build:

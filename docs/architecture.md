@@ -11,28 +11,48 @@ El objetivo es separar responsabilidades para facilitar:
 - Comunicación distribuida
 - Integración entre tecnologías diferentes
 
-El sistema utiliza Java y Python comunicándose mediante REST y RabbitMQ.
+El sistema utiliza Java, Python y Node.js comunicándose mediante REST y RabbitMQ.
 
 ---
 
 # Arquitectura general
 
 ```text
-Cliente/Postman
+Frontend / Cliente / Postman
         |
         v
-academic-service (Java)
+web-gateway-service (Node.js + Express + TypeScript)
         |
-        |---- PostgreSQL ----> PostgreSQL (persistencia académica)
-        |
-        |---- REST ----> recommendation-service (Python)
-        |
-        |---- RabbitMQ -> recommendation-worker (Python)
+        |---- REST ----> academic-service (Java)
+                              |
+                              |---- PostgreSQL ----> PostgreSQL (persistencia académica)
+                              |
+                              |---- REST ----> recommendation-service (Python)
+                              |
+                              |---- RabbitMQ -> recommendation-worker (Python)
 ```
 
 ---
 
 # Componentes del sistema
+
+## web-gateway-service
+
+Servicio de entrada para el frontend.
+
+Responsabilidades:
+
+- Recibir peticiones del frontend.
+- Reenviar solicitudes académicas a `academic-service`.
+- Centralizar el acceso HTTP externo del sistema.
+
+Tecnologías:
+
+- Node.js
+- Express
+- TypeScript
+
+---
 
 ## academic-service
 
@@ -96,6 +116,7 @@ Tecnologías:
 La comunicación REST ocurre entre:
 
 ```text
+web-gateway-service ---> academic-service
 academic-service ---> recommendation-service
 ```
 
@@ -119,12 +140,14 @@ academic-service ---> RabbitMQ ---> recommendation-worker
 
 Cuando un estudiante completa un recurso:
 
-1. academic-service registra el progreso
-2. academic-service publica un evento
-3. RabbitMQ almacena el mensaje
-4. recommendation-worker consume el evento
-5. recommendation-worker genera una recomendación a partir del evento recibido
-6. recommendation-service expone las recomendaciones consultables por REST
+1. frontend envía la solicitud al web-gateway-service
+2. web-gateway-service reenvía la petición a academic-service
+3. academic-service registra el progreso
+4. academic-service publica un evento
+5. RabbitMQ almacena el mensaje
+6. recommendation-worker consume el evento
+7. recommendation-worker genera una recomendación a partir del evento recibido
+8. recommendation-service expone las recomendaciones consultables por REST
 
 ---
 
@@ -234,7 +257,7 @@ El proyecto demuestra:
 - Uso de microservicios
 - Comunicación REST
 - Comunicación mediante colas
-- Integración Java y Python
+- Integración Java, Python y Node.js
 - Uso de hilos
 - Uso de Docker
 - Arquitectura distribuida
