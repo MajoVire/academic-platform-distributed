@@ -42,3 +42,7 @@ El proyecto está compuesto por varios servicios:
 - Generación de recomendaciones académicas.
 - Comunicación síncrona mediante APIs REST.
 - Comunicación asincrónica mediante RabbitMQ.
+
+## Estado del proyecto
+
+Proyecto académico en desarrollo.
