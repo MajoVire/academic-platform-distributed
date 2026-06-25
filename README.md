@@ -42,17 +42,18 @@ Implementar una arquitectura distribuida que demuestre:
 ## Arquitectura general
 
 ```text
-Cliente / Postman
+Cliente / React Frontend (Vite)
+        |---- Autenticación OAuth2 ----> Keycloak (Identity Provider)
         |
         v
-academic-service (Java + Spring Boot)
+academic-service (Java + Spring Boot + Spring Security)
         |
         |---- REST ----> recommendation-service (Python + FastAPI)
         |
         |---- RabbitMQ ---> recommendation-worker (Python)
 ```
 
-El sistema demuestra dos formas principales de comunicación distribuida:
+El sistema demuestra la comunicación distribuida incluyendo flujos de seguridad:
 
 ```text
 Comunicación síncrona:
@@ -60,6 +61,10 @@ academic-service ── REST ──► recommendation-service
 
 Comunicación asíncrona:
 academic-service ── RabbitMQ ──► recommendation-worker
+
+Seguridad (OAuth2):
+Frontend ── Token ──► Keycloak
+Frontend ── Bearer JWT ──► academic-service
 ```
 
 ---
@@ -77,6 +82,12 @@ academic-service ── RabbitMQ ──► recommendation-worker
 
 - API REST
 - RabbitMQ
+
+### Seguridad e Identidad
+
+- Keycloak (OAuth2 / OpenID Connect)
+- Spring Security Resource Server
+- keycloak-js
 
 ### Base de datos
 
@@ -374,6 +385,7 @@ Servicios configurados:
 | PostgreSQL | 5432 |
 | RabbitMQ | 5672 |
 | RabbitMQ Management | 15672 |
+| Keycloak | 8180 |
 
 Servicios esperados en la integración:
 
@@ -383,6 +395,7 @@ recommendation-service
 recommendation-worker
 rabbitmq
 postgres
+keycloak
 ```
 
 ---
@@ -713,11 +726,13 @@ La implementación actual está enfocada en la primera entrega de Sistemas Distr
 
 El objetivo principal de esta etapa es demostrar un flujo distribuido funcional, no implementar todavía una plataforma académica completa.
 
+**Integraciones recientes:**
+- Frontend web interactivo desarrollado en React (Vite + TailwindCSS).
+- Autenticación real basada en estándares usando OAuth2 con Keycloak como proveedor de identidad, garantizando un ecosistema seguro (Default Deny).
+
 El sistema puede ampliarse posteriormente con:
 
 - Persistencia completa en PostgreSQL.
-- Autenticación real.
-- Frontend web.
 - Panel administrativo.
 - Orquestación con Kubernetes.
 - Mayor lógica de recomendaciones.

@@ -4,6 +4,7 @@ import { getCourseResources, getStudentProgress, completeResource } from '../api
 import type { Resource } from '../types/academic'
 import ResourceCard from '../components/ui/ResourceCard'
 import { IoChevronBackOutline } from 'react-icons/io5'
+import { useAuth } from '../context/AuthProvider'
 
 // =========================================================================
 // PÁGINA DE RECURSOS DEL CURSO
@@ -49,7 +50,11 @@ export function ResourcesPage() {
   const [error, setError] = useState<string | null>(null)
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
 
-  const studentId = 1 // Simulamos que somos el estudiante con ID 1 para esta demo académica
+  const { userName } = useAuth()
+  // TODO: El backend requiere un studentId Integer. 
+  // En una implementación completa, se debe mapear el UUID de Keycloak con el ID interno de PostgreSQL.
+  // Por ahora mantenemos el ID simulado 1 para la lógica de progreso.
+  const studentId = 1 
 
   // Función para descargar los recursos de la materia y el progreso del estudiante actual
   const fetchResourcesAndProgress = async () => {

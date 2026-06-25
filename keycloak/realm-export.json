@@ -1,0 +1,95 @@
+{
+  "id": "academic-platform",
+  "realm": "academic-platform",
+  "displayName": "Academic Platform",
+  "loginTheme": "academic",
+  "internationalizationEnabled": true,
+  "supportedLocales": [
+    "es",
+    "en"
+  ],
+  "defaultLocale": "es",
+  "enabled": true,
+  "sslRequired": "external",
+  "registrationAllowed": true,
+  "roles": {
+    "realm": [
+      {
+        "name": "STUDENT",
+        "description": "Student role"
+      },
+      {
+        "name": "PROFESSOR",
+        "description": "Professor role"
+      },
+      {
+        "name": "ADMIN",
+        "description": "Administrator role"
+      }
+    ]
+  },
+  "defaultRoles": [
+    "default-roles-academic-platform",
+    "offline_access",
+    "uma_authorization",
+    "STUDENT"
+  ],
+  "clients": [
+    {
+      "clientId": "academic-frontend",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "redirectUris": [
+        "http://localhost:5173/*"
+      ],
+      "webOrigins": [
+        "http://localhost:5173",
+        "+"
+      ],
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "frontchannelLogout": true,
+      "attributes": {
+        "post.logout.redirect.uris": "http://localhost:5173/*"
+      }
+    }
+  ],
+  "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "email": "admin@academic.local",
+      "firstName": "System",
+      "lastName": "Admin",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "ADMIN"
+      ]
+    },
+    {
+      "username": "student",
+      "enabled": true,
+      "email": "student@academic.local",
+      "firstName": "Test",
+      "lastName": "Student",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "student",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "STUDENT"
+      ]
+    }
+  ]
+}

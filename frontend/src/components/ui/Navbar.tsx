@@ -7,10 +7,13 @@ import {
    IoBarChartOutline, 
    IoBarChart, 
    IoSparklesOutline, 
-   IoSparkles 
+   IoSparkles,
+   IoLogOutOutline,
+   IoLogInOutline
 } from 'react-icons/io5'
 import ThemeToggle from './ThemeToggle'
 import logoPNG from '../../assets/logo.png'
+import { useAuth } from '../../context/AuthProvider'
 
 // Interfaz que define la estructura de cada botón de la barra de navegación.
 interface NavItem {
@@ -49,6 +52,8 @@ const navigationItems: NavItem[] = [
 ]
 
 export function Navbar() {
+  const { isAuthenticated, login, logout, userName } = useAuth()
+
   return (
     <>
       {/* =========================================================================
@@ -56,54 +61,69 @@ export function Navbar() {
           ========================================================================= */}
       <header className="hidden md:block sticky top-0 z-50 w-full bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-900/80 transition-colors duration-300">
         <div className="mx-auto max-w-7xl px-6 h-24 flex items-center justify-between">
-          {/* Logo / Marca a la izquierda */}
-          <NavLink to="/" className="flex items-center gap-4 text-slate-800 dark:text-slate-100 group">
-            <img 
-              src={logoPNG} 
-              alt="Logo Plataforma" 
-              className="w-20 h-20 object-contain flex-shrink-0 transition-all duration-300 group-hover:scale-105"
-            />
-            <span className="font-black text-2xl tracking-tight bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
-              Plataforma Académica
-            </span>
-          </NavLink>
+          {/* Bloque Izquierdo: Logo y Navegación juntos */}
+          <div className="flex items-center gap-8">
+            {/* Logo / Marca a la izquierda */}
+            <NavLink to="/" className="flex items-center gap-4 text-slate-800 dark:text-slate-100 group">
+              <img 
+                src={logoPNG} 
+                alt="Logo Plataforma" 
+                className="w-20 h-20 object-contain flex-shrink-0 transition-all duration-300 group-hover:scale-105"
+              />
+              <span className="font-black text-2xl tracking-tight bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
+                Plataforma Académica
+              </span>
+            </NavLink>
 
-          {/* Menú de Navegación del centro */}
-          <nav className="flex items-center gap-1.5">
-            {navigationItems.map((item) => {
-              const IconOutline = item.iconOutline
-              const IconSolid = item.iconSolid
-              return (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  className={({ isActive }) =>
-                    `relative px-4 py-2.5 rounded-xl text-[15px] font-bold transition-all duration-300 flex items-center gap-2 ${
-                      // Si la ruta está activa, se colorea de azul con un fondo levemente azulado
-                      isActive
-                        ? 'text-blue-600 dark:text-blue-400 bg-blue-50/70 dark:bg-blue-950/20'
-                        : 'text-blue-950/70 dark:text-slate-300 hover:text-blue-950 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/40'
-                    }`
-                  }
-                >
-                  {({ isActive }) => (
-                    <>
-                      {/* Alterna el icono entre sólido y bordeado dependiendo de si la ruta está activa */}
-                      {isActive ? <IconSolid className="w-4.5 h-4.5" /> : <IconOutline className="w-4.5 h-4.5" />}
-                      {item.label}
-                      {/* Una sutil línea azul inferior para el elemento activo */}
-                      {isActive && (
-                        <span className="absolute bottom-0 left-4 right-4 h-0.5 bg-blue-600 dark:bg-blue-400 rounded-full" />
-                      )}
-                    </>
-                  )}
-                </NavLink>
-              )
-            })}
-          </nav>
+            {/* Menú de Navegación */}
+            <nav className="flex items-center gap-1.5">
+              {navigationItems.filter(item => isAuthenticated || item.to === '/').map((item) => {
+                const IconOutline = item.iconOutline
+                const IconSolid = item.iconSolid
+                return (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    className={({ isActive }) =>
+                      `relative px-4 py-2.5 rounded-xl text-[15px] font-bold transition-all duration-300 flex items-center gap-2 ${
+                        // Si la ruta está activa, se colorea de azul con un fondo levemente azulado
+                        isActive
+                          ? 'text-blue-600 dark:text-blue-400 bg-blue-50/70 dark:bg-blue-950/20'
+                          : 'text-blue-950/70 dark:text-slate-300 hover:text-blue-950 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/40'
+                      }`
+                    }
+                  >
+                    {({ isActive }) => (
+                      <>
+                        {/* Alterna el icono entre sólido y bordeado dependiendo de si la ruta está activa */}
+                        {isActive ? <IconSolid className="w-4.5 h-4.5" /> : <IconOutline className="w-4.5 h-4.5" />}
+                        {item.label}
+                        {/* Una sutil línea azul inferior para el elemento activo */}
+                        {isActive && (
+                          <span className="absolute bottom-0 left-4 right-4 h-0.5 bg-blue-600 dark:bg-blue-400 rounded-full" />
+                        )}
+                      </>
+                    )}
+                  </NavLink>
+                )
+              })}
+            </nav>
+          </div>
 
           {/* Acciones de la derecha (Botón de cambiar Modo Claro / Oscuro) */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
+            {isAuthenticated ? (
+              <button onClick={() => logout()} className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-red-500 dark:text-slate-400 dark:hover:text-red-400 transition-colors cursor-pointer" title="Cerrar sesión">
+                <span className="hidden lg:inline max-w-[120px] truncate">{userName}</span>
+                <IoLogOutOutline className="w-5.5 h-5.5" />
+              </button>
+            ) : (
+              <button onClick={() => login()} className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition-colors cursor-pointer" title="Iniciar sesión">
+                <span className="hidden lg:inline">Ingresar</span>
+                <IoLogInOutline className="w-5.5 h-5.5" />
+              </button>
+            )}
+            <div className="w-px h-6 bg-slate-200 dark:bg-slate-800"></div>
             <ThemeToggle />
           </div>
         </div>
@@ -114,8 +134,8 @@ export function Navbar() {
           Le da un aspecto nativo de app móvil con botones grandes en la parte de abajo
           ========================================================================= */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 h-16 bg-white/90 dark:bg-slate-950/90 backdrop-blur-lg border-t border-slate-200/60 dark:border-slate-900/60 transition-colors duration-300 pb-safe">
-        <div className="grid grid-cols-4 h-full max-w-md mx-auto items-center px-2">
-          {navigationItems.map((item) => {
+        <div className={`grid h-full max-w-md mx-auto items-center px-2 ${isAuthenticated ? 'grid-cols-4' : 'grid-cols-1'}`}>
+          {navigationItems.filter(item => isAuthenticated || item.to === '/').map((item) => {
             const IconOutline = item.iconOutline
             const IconSolid = item.iconSolid
             return (
@@ -172,7 +192,18 @@ export function Navbar() {
             Plataforma Académica
           </span>
         </div>
-        <ThemeToggle />
+        <div className="flex items-center gap-4">
+          {isAuthenticated ? (
+            <button onClick={() => logout()} className="text-slate-500 hover:text-red-500 dark:text-slate-400 dark:hover:text-red-400 transition-colors cursor-pointer" title="Cerrar sesión">
+              <IoLogOutOutline className="w-6 h-6" />
+            </button>
+          ) : (
+            <button onClick={() => login()} className="text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition-colors cursor-pointer" title="Iniciar sesión">
+              <IoLogInOutline className="w-6 h-6" />
+            </button>
+          )}
+          <ThemeToggle />
+        </div>
       </header>
     </>
   )

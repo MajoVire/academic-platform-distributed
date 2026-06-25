@@ -61,3 +61,8 @@ export async function getStudentRecommendations(
   )
   return data
 }
+// Obtiene el contador optimizado de todos los recursos del catálogo para evitar el problema N+1
+export async function getCatalogResourceCountApi(): Promise<number> {
+  const { data } = await apiClient.get<number>('/api/catalog/resources/count')
+  return data
+}

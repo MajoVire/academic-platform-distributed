@@ -1,19 +1,25 @@
 import { BrowserRouter, Route, Routes } from 'react-router'
 import { appRoutes } from './routes/appRoutes'
+import { AuthProvider } from './context/AuthProvider'
+import { PrivateRoute } from './components/Auth/PrivateRoute'
 
-// Este es el componente raíz ("Root") de nuestra app.
-// Configura el enrutador para que la app sepa qué página mostrar según la URL actual.
 function App() {
   return (
-    // BrowserRouter permite la navegación sin recargar la página completa.
-    <BrowserRouter>
-      <Routes>
-        {/* Mapeamos cada ruta definida en appRoutes para crear sus respectivas pantallas en React */}
-        {appRoutes.map(({ element, path }) => (
-          <Route key={path} path={path} element={element} />
-        ))}
-      </Routes>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          {appRoutes.map(({ element, path, isPrivate }) => (
+            <Route
+              key={path}
+              path={path}
+              element={isPrivate ? <PrivateRoute /> : element}
+            >
+              {isPrivate && <Route index element={element} />}
+            </Route>
+          ))}
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   )
 }
 

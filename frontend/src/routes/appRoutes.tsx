@@ -12,6 +12,7 @@ import SubjectsPage from '../pages/SubjectsPage'
 export const appRoutes = [
   {
     path: '/', // Página de inicio / Landing page
+    isPrivate: false,
     element: (
       <MainLayout>
         <HomePage />
@@ -20,6 +21,7 @@ export const appRoutes = [
   },
   {
     path: '/subjects', // Catálogo general de materias
+    isPrivate: true,
     element: (
       <MainLayout>
         <SubjectsPage />
@@ -28,6 +30,7 @@ export const appRoutes = [
   },
   {
     path: '/courses', // Todos los cursos en general
+    isPrivate: true,
     element: (
       <MainLayout>
         <CoursesPage />
@@ -36,6 +39,7 @@ export const appRoutes = [
   },
   {
     path: '/subjects/:subjectId/courses', // Cursos filtrados por una materia en específico
+    isPrivate: true,
     element: (
       <MainLayout>
         <CoursesPage />
@@ -44,6 +48,7 @@ export const appRoutes = [
   },
   {
     path: '/resources', // Todos los recursos en general
+    isPrivate: true,
     element: (
       <MainLayout>
         <ResourcesPage />
@@ -52,6 +57,7 @@ export const appRoutes = [
   },
   {
     path: '/courses/:courseId/resources', // Recursos asociados a un curso en específico
+    isPrivate: true,
     element: (
       <MainLayout>
         <ResourcesPage />
@@ -59,7 +65,8 @@ export const appRoutes = [
     ),
   },
   {
-    path: '/progress', // Progreso académico del estudiante actual (usa id=1 por defecto)
+    path: '/progress', // Progreso académico del estudiante actual
+    isPrivate: true,
     element: (
       <MainLayout>
         <ProgressPage />
@@ -68,6 +75,7 @@ export const appRoutes = [
   },
   {
     path: '/students/:studentId/progress', // Progreso académico para un estudiante específico
+    isPrivate: true,
     element: (
       <MainLayout>
         <ProgressPage />
@@ -75,7 +83,8 @@ export const appRoutes = [
     ),
   },
   {
-    path: '/recommendations', // Recomendaciones inteligentes del estudiante actual (usa id=1 por defecto)
+    path: '/recommendations', // Recomendaciones inteligentes del estudiante actual
+    isPrivate: true,
     element: (
       <MainLayout>
         <RecommendationsPage />
@@ -84,6 +93,7 @@ export const appRoutes = [
   },
   {
     path: '/students/:studentId/recommendations', // Recomendaciones inteligentes para un estudiante específico
+    isPrivate: true,
     element: (
       <MainLayout>
         <RecommendationsPage />

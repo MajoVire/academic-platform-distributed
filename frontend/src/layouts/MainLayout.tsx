@@ -28,35 +28,27 @@ function MainLayout({ children }: MainLayoutProps) {
         {children}
       </main>
 
-      {/* Pie de página corporativo premium (Oculto en móvil, con alta distinción en modo oscuro) */}
-      <footer className="hidden md:block w-full border-t border-slate-200/60 dark:border-slate-800 bg-white/70 dark:bg-slate-900 backdrop-blur-md transition-all duration-300 z-10">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8 md:py-10 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex flex-col items-center md:items-start gap-1.5 text-center md:text-left">
-            <span className="font-extrabold text-xs text-blue-600/85 dark:text-blue-400 uppercase tracking-widest block">
-              Ciencias de la Computación
-            </span>
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-              © {new Date().getFullYear()} Plataforma Académica Distribuida. Todos los derechos reservados.
-            </span>
-            <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">
-              CUENCA-ECUADOR
-            </span>
-          </div>
-
-          <div className="flex flex-col items-center md:items-end gap-2.5">
-            <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-              Desarrolladores
-            </span>
-            <div className="flex flex-wrap justify-center md:justify-end gap-x-3.5 gap-y-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300">
-              <span className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 cursor-default">Macas Y.</span>
-              <span className="text-slate-300 dark:text-slate-800 select-none">•</span>
-              <span className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 cursor-default">Moreno C.</span>
-              <span className="text-slate-300 dark:text-slate-800 select-none">•</span>
-              <span className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 cursor-default">Patiño D.</span>
-              <span className="text-slate-300 dark:text-slate-800 select-none">•</span>
-              <span className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 cursor-default">Siguencia K.</span>
-              <span className="text-slate-300 dark:text-slate-800 select-none">•</span>
-              <span className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 cursor-default">Vire M.</span>
+      {/* Pie de página Estilo Udemy (Simplificado) */}
+      <footer className="w-full bg-[#1c1d1f] text-white mt-12 py-6 transition-all z-10 font-sans">
+        <div className="max-w-7xl mx-auto px-6">
+          {/* Bottom Bar: Logo y Copyright */}
+          <div className="flex flex-col md:flex-row items-center justify-between">
+            <div className="flex items-center gap-3 mb-4 md:mb-0">
+              <span className="font-black text-2xl tracking-tight text-white">
+                Plataforma Académica
+              </span>
+              <span className="text-xs text-slate-400 mt-1">
+                © {new Date().getFullYear()} Inc.
+              </span>
+            </div>
+            
+            <div className="flex flex-wrap items-center justify-center md:justify-end gap-x-3 text-xs text-slate-400">
+              <span>Desarrolladores:</span>
+              <span className="hover:text-white cursor-pointer">Macas Y.</span> •
+              <span className="hover:text-white cursor-pointer">Moreno C.</span> •
+              <span className="hover:text-white cursor-pointer">Patiño D.</span> •
+              <span className="hover:text-white cursor-pointer">Siguencia K.</span> •
+              <span className="hover:text-white cursor-pointer">Vire M.</span>
             </div>
           </div>
         </div>

@@ -73,6 +73,24 @@ export function SubjectsPage() {
     fetchSubjects()
   }, [])
 
+  // Mapeo de 15 imágenes generadas por IA para las materias
+  const availableImages = [
+    '/course_docker.png',         // 1. Sistemas Distribuidos
+    '/subject_se.png',            // 2. Ingenieria de Software
+    '/subject_database.png',      // 3. Base de Datos II
+    '/subject_pm.png',            // 4. Gestion de Proyectos
+    '/subject_ai.png',            // 5. Inteligencia Artificial
+    '/subject_os.png',            // 6. Sistemas Operativos
+    '/subject_req.png',           // 7. Ingenieria de Requerimientos
+    '/subject_emp.png',           // 8. Ingenieria de Software Empirica
+    '/subject_net.png',           // 9. Redes de Computadores
+    '/subject_sec.png',           // 10. Seguridad Informatica
+    '/subject_qa.png',            // 11. Verificacion y Validacion
+    '/course_architecture.png',   // 12. Diseño y Arquitectura de Software
+    '/subject_hci.png',           // 13. Interacción Humano-Máquina
+    '/course_python.png',         // 14. Programación Web
+    '/subject_edu.png',           // 15. Tecnologías para la Educación
+  ]
 
   return (
     <div className="space-y-8 text-left">
@@ -109,7 +127,8 @@ export function SubjectsPage() {
               id={subject.id}
               name={subject.name}
               description={subject.description || ''}
-              courseCount={subject.id === 1 ? 2 : subject.id === 2 ? 1 : 0} // Representar semánticamente el conteo según init.sql
+              courseCount={(subject.id % 2) + 1} // Representar semánticamente un conteo
+              image={availableImages[(subject.id - 1) % availableImages.length]}
               to={`/subjects/${subject.id}/courses`}
             />
           ))

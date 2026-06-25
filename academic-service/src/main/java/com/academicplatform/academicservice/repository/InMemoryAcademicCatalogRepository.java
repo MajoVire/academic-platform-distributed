@@ -59,6 +59,11 @@ public class InMemoryAcademicCatalogRepository implements AcademicCatalogReposit
         return Optional.ofNullable(resources.get(resourceId));
     }
 
+    @Override
+    public long countAllResources() {
+        return resources.size();
+    }
+
     private void loadSampleData() {
         Subject distributedSystems = new Subject(1L, "Sistemas Distribuidos", "Conceptos base de sistemas distribuidos y servicios");
         Subject softwareEngineering = new Subject(2L, "Ingenieria de Software", "Practicas de analisis, diseno y calidad");

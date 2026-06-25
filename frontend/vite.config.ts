@@ -40,9 +40,10 @@ export default defineConfig({
     }),
   ],
   server: {
+    host: true, // Listen on all network interfaces
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
+        target: process.env.VITE_API_PROXY_TARGET || 'http://localhost:8080',
         changeOrigin: true,
       },
     },

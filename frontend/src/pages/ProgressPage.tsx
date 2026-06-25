@@ -5,6 +5,7 @@ import {
   getStudentProgress,
   getSubjectCourses,
   getSubjects,
+  getCatalogResourceCountApi,
 } from '../api/academicApi'
 import type { Course, Resource } from '../types/academic'
 import ProgressCircle from '../components/ui/ProgressCircle'
@@ -22,40 +23,6 @@ type ProgressViewModel = {
   totalResources: number
   percentage: number
   lastCompletedAt?: string
-}
-
-async function getCatalogResourceCount(): Promise<number> {
-  const subjects = await getSubjects()
-
-  const coursesBySubject = await Promise.all(
-    subjects.map(async (subject) => {
-      try {
-        return await getSubjectCourses(subject.id)
-      } catch (error) {
-        console.warn(`No se pudieron cargar los cursos de la materia ${subject.id}:`, error)
-        return [] as Course[]
-      }
-    }),
-  )
-
-  const allCourses = coursesBySubject.flat()
-
-  const resourcesByCourse = await Promise.all(
-    allCourses.map(async (course) => {
-      try {
-        return await getCourseResources(course.id)
-      } catch (error) {
-        console.warn(`No se pudieron cargar los recursos del curso ${course.id}:`, error)
-        return [] as Resource[]
-      }
-    }),
-  )
-
-  const uniqueResourceIds = new Set(
-    resourcesByCourse.flat().map((resource) => resource.id),
-  )
-
-  return uniqueResourceIds.size
 }
 
 // Ilustración Isométrica de Crecimiento y Métricas
@@ -83,6 +50,8 @@ const IsometricProgressIllustration = () => (
   </svg>
 )
 
+import { useAuth } from '../context/AuthProvider'
+
 export function ProgressPage() {
   // Obtenemos de forma opcional el id del estudiante desde la URL si existiera
   const { studentId } = useParams<{ studentId?: string }>()
@@ -92,7 +61,10 @@ export function ProgressPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  const { userName } = useAuth()
+  
   // Si no se especifica un estudiante en la URL, usamos el estudiante 1 por defecto
+  // TODO: Mapear usuario de Keycloak a ID de PostgreSQL
   const defaultStudentId = studentId ? parseInt(studentId, 10) : 1
 
   // Al cargar la página, llamamos a la API para traer las métricas del estudiante
@@ -102,7 +74,7 @@ export function ProgressPage() {
         setLoading(true)
         const [studentProgress, catalogResourceCount] = await Promise.all([
           getStudentProgress(defaultStudentId),
-          getCatalogResourceCount(),
+          getCatalogResourceCountApi(),
         ])
 
         const completedResources = studentProgress.totalCompletedResources
