@@ -4,6 +4,7 @@ import { getStudentRecommendations } from '../api/academicApi'
 import type { Recommendation } from '../types/academic'
 import RecommendationCard from '../components/ui/RecommendationCard'
 import { IoSparklesOutline } from 'react-icons/io5'
+import { useRecommendationNotifications } from '../hooks/useRecommendationNotifications'
 
 // Ilustración Isométrica de Cerebro IA / Núcleo de Computo
 const IsometricAIIllustration = () => (
@@ -41,6 +42,7 @@ export function RecommendationsPage() {
   const [error, setError] = useState<string | null>(null)
 
   const defaultStudentId = studentId ? parseInt(studentId, 10) : 1
+  const { connected, notification } = useRecommendationNotifications()
 
   useEffect(() => {
     const fetchRecommendations = async () => {
@@ -80,6 +82,34 @@ export function RecommendationsPage() {
           <IsometricAIIllustration />
         </div>
       </div>
+
+      <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4">
+  <h2 className="font-semibold mb-2">
+    Estado del WebSocket
+  </h2>
+
+  <p>
+    Estado:
+    <span
+      className={`ml-2 font-bold ${
+        connected
+          ? 'text-green-600'
+          : 'text-red-600'
+      }`}
+    >
+      {connected ? 'Conectado' : 'Desconectado'}
+    </span>
+  </p>
+
+  {notification && (
+    <div className="mt-4 rounded-lg bg-slate-100 dark:bg-slate-800 p-3 text-sm">
+      <p><strong>Estudiante:</strong> {notification.studentId}</p>
+      <p><strong>Estado:</strong> {notification.status}</p>
+      <p><strong>Mensaje:</strong> {notification.message}</p>
+      <p><strong>Hora:</strong> {notification.timestamp}</p>
+    </div>
+  )}
+</div>
 
       {error && (
         <div className="p-4 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 text-sm">
