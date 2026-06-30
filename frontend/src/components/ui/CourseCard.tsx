@@ -1,14 +1,15 @@
 import { Link } from 'react-router'
 import { useState } from 'react'
 
+// Propiedades recibidas para renderizar una tarjeta de curso.
 interface CourseCardProps {
   id: number
   title: string
   description: string
-  subjectName?: string
-  imageUrl?: string
-  resourceCount?: number
-  to?: string
+  subjectName?: string // Opcional, nombre de la materia a la que pertenece el curso.
+  imageUrl?: string // URL de la imagen de portada.
+  resourceCount?: number // Cantidad opcional de recursos asociados a este curso.
+  to?: string // Ruta URL opcional si queremos que la tarjeta sea un enlace clickeable.
 }
 
 export function CourseCard({
@@ -19,20 +20,23 @@ export function CourseCard({
   resourceCount,
   to,
 }: CourseCardProps) {
+  // Estado local para manejar si ocurre un error al cargar la imagen, para poder poner un marcador de posición de respaldo.
   const [imageError, setImageError] = useState(false)
 
+  // El diseño central de la tarjeta (imagen + detalles)
   const cardContent = (
-    <div className="group flex flex-col h-full bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-none hover:border-blue-500/50 dark:hover:border-blue-500/50 dark:hover:shadow-[0_0_20px_rgba(46,81,156,0.25)] transition-all duration-300 overflow-hidden">
-      {/* Contenedor de Imagen (Espacio img) */}
+    <div className="group flex flex-col h-full bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/60 dark:border-slate-700/80 shadow-sm hover:shadow-xl hover:-translate-y-1.5 hover:border-blue-500/40 dark:hover:border-blue-400/40 dark:hover:shadow-[0_12px_30px_rgba(66,111,192,0.12)] transition-all duration-300 ease-out overflow-hidden">
+      {/* Contenedor de Imagen (Espacio de portada del curso) */}
       <div className="relative aspect-video w-full bg-slate-100 dark:bg-slate-900 overflow-hidden">
         {imageUrl && !imageError ? (
           <img
             src={imageUrl}
             alt={title}
-            onError={() => setImageError(true)}
+            onError={() => setImageError(true)} // Si la imagen falla en cargar, cambiamos el estado de error
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
+          // Vista alternativa si la imagen falla o no tiene URL
           <div className="w-full h-full bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950/20 dark:to-indigo-950/20 flex items-center justify-center p-4">
             <svg
               className="w-12 h-12 text-blue-500/60 dark:text-blue-400/40"
@@ -49,6 +53,7 @@ export function CourseCard({
             </svg>
           </div>
         )}
+        {/* Etiqueta flotante con el nombre de la materia */}
         {subjectName && (
           <span className="absolute top-3 left-3 px-2.5 py-1 text-xs font-semibold rounded-full bg-blue-600 text-white shadow-sm">
             {subjectName}
@@ -56,7 +61,7 @@ export function CourseCard({
         )}
       </div>
 
-      {/* Contenido de la Tarjeta */}
+      {/* Contenido textual de la Tarjeta */}
       <div className="flex flex-col flex-grow p-5 text-left">
         <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 line-clamp-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
           {title}
@@ -65,6 +70,7 @@ export function CourseCard({
           {description}
         </p>
         
+        {/* Muestra la cantidad de recursos de aprendizaje (como videos/lecturas) del curso */}
         {resourceCount !== undefined && (
           <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-900 flex items-center text-xs font-medium text-slate-400 dark:text-slate-500">
             <svg
@@ -87,6 +93,7 @@ export function CourseCard({
     </div>
   )
 
+  // Si se le pasa la prop "to", devolvemos la tarjeta envuelta en un enlace (Link) de React Router.
   if (to) {
     return (
       <Link to={to} className="block h-full no-underline">
@@ -99,3 +106,4 @@ export function CourseCard({
 }
 
 export default CourseCard
+

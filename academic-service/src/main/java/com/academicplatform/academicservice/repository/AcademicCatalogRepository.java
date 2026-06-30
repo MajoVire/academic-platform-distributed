@@ -20,4 +20,6 @@ public interface AcademicCatalogRepository {
     List<Resource> findResourcesByCourseId(Long courseId);
 
     Optional<Resource> findResourceById(Long resourceId);
+
+    long countAllResources();
 }

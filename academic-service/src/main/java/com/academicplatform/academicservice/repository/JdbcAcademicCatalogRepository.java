@@ -91,4 +91,10 @@ public class JdbcAcademicCatalogRepository implements AcademicCatalogRepository 
                         rs.getString("type")),
                 resourceId).stream().findFirst();
     }
+
+    @Override
+    public long countAllResources() {
+        Long count = jdbcTemplate.queryForObject("SELECT COUNT(id) FROM resources", Long.class);
+        return count != null ? count : 0L;
+    }
 }

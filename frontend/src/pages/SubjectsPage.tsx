@@ -3,9 +3,21 @@ import { getSubjects } from '../api/academicApi'
 import type { Subject } from '../types/academic'
 import SubjectCard from '../components/ui/SubjectCard'
 
+// =========================================================================
+// PÁGINA DE MATERIAS
+// Esta página carga el catálogo completo de materias del backend (Spring Boot)
+// y las muestra usando la tarjeta interactiva <SubjectCard>.
+// =========================================================================
+
 // Ilustración Isométrica de Librería Académica
 const IsometricLibraryIllustration = () => (
   <svg viewBox="0 0 200 160" className="w-36 h-28 select-none pointer-events-none drop-shadow-lg hidden sm:block overflow-visible">
+    <defs>
+      <linearGradient id="bookGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.4" />
+        <stop offset="100%" stopColor="#1d4ed8" stopOpacity="0.1" />
+      </linearGradient>
+    </defs>
     <ellipse cx="100" cy="130" rx="60" ry="22" fill="#475569" fillOpacity="0.08" />
 
     {/* Book 1 (Left, standing) */}
@@ -36,14 +48,17 @@ const IsometricLibraryIllustration = () => (
 )
 
 export function SubjectsPage() {
+  // Estados para almacenar las materias cargadas, el estado de carga y posibles errores de red.
   const [subjects, setSubjects] = useState<Subject[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // useEffect se dispara al cargar la página por primera vez.
   useEffect(() => {
     const fetchSubjects = async () => {
       try {
         setLoading(true)
+        // Llamada asíncrona a nuestra función de API para obtener la lista de materias de la base de datos
         const data = await getSubjects()
         setSubjects(data)
         setError(null)
@@ -51,12 +66,31 @@ export function SubjectsPage() {
         console.error('Error fetching subjects:', err)
         setError('No se pudo conectar con el servidor académico. Asegúrate de que el backend esté ejecutándose.')
       } finally {
-        setLoading(false)
+        setLoading(false) // Finaliza el estado de carga
       }
     }
 
     fetchSubjects()
   }, [])
+
+  // Mapeo de 15 imágenes generadas por IA para las materias
+  const availableImages = [
+    '/course_docker.png',         // 1. Sistemas Distribuidos
+    '/subject_se.png',            // 2. Ingenieria de Software
+    '/subject_database.png',      // 3. Base de Datos II
+    '/subject_pm.png',            // 4. Gestion de Proyectos
+    '/subject_ai.png',            // 5. Inteligencia Artificial
+    '/subject_os.png',            // 6. Sistemas Operativos
+    '/subject_req.png',           // 7. Ingenieria de Requerimientos
+    '/subject_emp.png',           // 8. Ingenieria de Software Empirica
+    '/subject_net.png',           // 9. Redes de Computadores
+    '/subject_sec.png',           // 10. Seguridad Informatica
+    '/subject_qa.png',            // 11. Verificacion y Validacion
+    '/course_architecture.png',   // 12. Diseño y Arquitectura de Software
+    '/subject_hci.png',           // 13. Interacción Humano-Máquina
+    '/course_python.png',         // 14. Programación Web
+    '/subject_edu.png',           // 15. Tecnologías para la Educación
+  ]
 
   return (
     <div className="space-y-8 text-left">
@@ -93,7 +127,8 @@ export function SubjectsPage() {
               id={subject.id}
               name={subject.name}
               description={subject.description || ''}
-              courseCount={subject.id === 1 ? 2 : subject.id === 2 ? 1 : 0} // Representar semánticamente el conteo según init.sql
+              courseCount={(subject.id % 2) + 1} // Representar semánticamente un conteo
+              image={availableImages[(subject.id - 1) % availableImages.length]}
               to={`/subjects/${subject.id}/courses`}
             />
           ))

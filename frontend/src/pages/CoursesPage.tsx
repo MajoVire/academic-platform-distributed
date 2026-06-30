@@ -5,31 +5,43 @@ import type { Course, Subject } from '../types/academic'
 import CourseCard from '../components/ui/CourseCard'
 import { IoChevronBackOutline } from 'react-icons/io5'
 
-// Importación de imágenes de cursos desde assets
+// =========================================================================
+// PÁGINA DE CURSOS
+// Esta página carga y muestra los cursos de una materia específica
+// (filtrando por subjectId que viene en los parámetros de la URL).
+// =========================================================================
+
+// Importación de imágenes de cursos reales desde assets para que no haya imágenes rotas.
 import sistemasDistribuidosImg from '../assets/sistemasDistribuidos.png'
 import mensajeriaYColasImg from '../assets/mensajeriaYColas.png'
 import disenosoftwareImg from '../assets/disenosoftware.png'
 
+// Diccionario de imágenes asociadas al ID de cada curso para dibujarlas dinámicamente.
 const courseImageMap: Record<number, string> = {
   1: sistemasDistribuidosImg,
   2: mensajeriaYColasImg,
   3: disenosoftwareImg,
 }
 
+
 export function CoursesPage() {
+  // Obtiene el ID de la materia actual desde la URL (ej. /subjects/1/courses -> subjectId es "1")
   const { subjectId } = useParams<{ subjectId?: string }>()
+  
+  // Estados para los cursos cargados, la materia actual, la pantalla de carga y errores
   const [courses, setCourses] = useState<Course[]>([])
   const [subject, setSubject] = useState<Subject | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // Dispara el efecto cada vez que cambie "subjectId" para volver a cargar los datos correctos
   useEffect(() => {
     const fetchCoursesAndSubject = async () => {
       try {
         setLoading(true)
         setError(null)
         
-        // Cargar materias para encontrar la actual o mostrar todas
+        // Cargar materias para encontrar el nombre de la materia actual
         const subjectsList = await getSubjects()
         
         if (subjectId) {
@@ -39,10 +51,11 @@ export function CoursesPage() {
             setSubject(currentSubject)
           }
           
+          // Obtener los cursos pertenecientes a esta materia desde la API de Spring Boot
           const coursesData = await getSubjectCourses(sId)
           setCourses(coursesData)
         } else {
-          // Si no hay id de materia, cargar todos los cursos de todas las materias
+          // Si no hay id de materia, cargar todos los cursos de la plataforma iterando sobre las materias
           setSubject(null)
           let allCourses: Course[] = []
           for (const s of subjectsList) {
@@ -61,6 +74,7 @@ export function CoursesPage() {
 
     fetchCoursesAndSubject()
   }, [subjectId])
+
 
   return (
     <div className="space-y-8 text-left">
