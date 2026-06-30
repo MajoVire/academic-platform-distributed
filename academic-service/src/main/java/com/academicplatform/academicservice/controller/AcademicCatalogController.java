@@ -51,4 +51,8 @@ public class AcademicCatalogController {
         return resourceCompletionService.completeResource(studentId, resourceId);
     }
 
+    @GetMapping("/catalog/resources/count")
+    public long getCatalogResourceCount() {
+        return academicCatalogService.countAllResources();
+    }
 }

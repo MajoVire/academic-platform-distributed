@@ -1,0 +1,19 @@
+import { useEffect } from 'react'
+import { Outlet } from 'react-router'
+import { useAuth } from '../../context/AuthProvider'
+
+export function PrivateRoute() {
+  const { isAuthenticated, login } = useAuth()
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      login()
+    }
+  }, [isAuthenticated, login])
+
+  if (!isAuthenticated) {
+    return null // O un componente de carga mientras redirige
+  }
+
+  return <Outlet />
+}

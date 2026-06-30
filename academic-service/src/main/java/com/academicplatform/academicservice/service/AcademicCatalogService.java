@@ -65,4 +65,8 @@ public class AcademicCatalogService {
         return academicCatalogRepository.findResourceById(resourceId)
                 .orElseThrow(() -> new ResourceNotFoundException(resourceId));
     }
+
+    public long countAllResources() {
+        return academicCatalogRepository.countAllResources();
+    }
 }
