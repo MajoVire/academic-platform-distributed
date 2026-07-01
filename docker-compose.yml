@@ -106,11 +106,20 @@ services:
     container_name: web-gateway-service
     restart: always
     environment:
+            
       WEB_GATEWAY_PORT: ${WEB_GATEWAY_PORT:-3000}
       ACADEMIC_SERVICE_URL: ${ACADEMIC_SERVICE_URL:-http://academic-service:8080}
       GATEWAY_CORS_ORIGIN: ${GATEWAY_CORS_ORIGIN:-http://localhost:5173}
       REQUEST_TIMEOUT_MS: ${REQUEST_TIMEOUT_MS:-5000}
       NODE_ENV: ${NODE_ENV:-development}
+
+      RABBITMQ_HOST: ${RABBITMQ_HOST:-rabbitmq}
+      RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
+      RABBITMQ_USERNAME: ${RABBITMQ_HOST:-guest}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-change_this_rabbitmq_password}
+
+      ACADEMIC_NOTIFICATIONS_EXCHANGE: ${ACADEMIC_NOTIFICATIONS_EXCHANGE:-academic.notifications.exchange}
+      ACADEMIC_RECOMMENDATION_GENERATED_ROUTING_KEY: ${ACADEMIC_RECOMMENDATION_GENERATED_ROUTING_KEY:-academic.recommendation.generated}
     ports:
       - "3000:3000"
     depends_on:
