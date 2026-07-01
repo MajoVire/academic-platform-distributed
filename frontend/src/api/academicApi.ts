@@ -1,3 +1,4 @@
+
 import { apiClient } from './apiClient'
 import type {
   Course,
@@ -7,35 +8,101 @@ import type {
   Subject,
 } from '../types/academic'
 
-// Trae todas las materias registradas (como "Sistemas Distribuidos" o "Diseño de Software").
+
+import {
+  getSubjects as getCachedSubjects,
+  getCourses as getCachedCourses,
+  getResources as getCachedResources,
+  saveSubjects,
+  saveCourses,
+  saveResources,
+} from '../offline/catalog-cache'
+
+import { addPendingOperation } from '../offline/pending-operations'
+
 export async function getSubjects(): Promise<Subject[]> {
-  const { data } = await apiClient.get<Subject[]>('/api/subjects')
-  return data
+
+  try {
+
+    const { data } = await apiClient.get<Subject[]>('/api/subjects')
+
+    await saveSubjects(data)
+
+    return data
+
+  } catch {
+
+    return await getCachedSubjects()
+
+  }
 }
 
-// Obtiene los cursos asociados a una materia específica usando su ID.
-export async function getSubjectCourses(subjectId: number): Promise<Course[]> {
-  const { data } = await apiClient.get<Course[]>(
-    `/api/subjects/${subjectId}/courses`,
-  )
-  return data
+export async function getSubjectCourses(
+  subjectId: number,
+): Promise<Course[]> {
+
+  try {
+
+    const { data } = await apiClient.get<Course[]>(
+      `/api/subjects/${subjectId}/courses`,
+    )
+
+    await saveCourses(data)
+
+    return data
+
+  } catch {
+
+    const courses = await getCachedCourses()
+
+    return courses.filter(course => course.subjectId === subjectId)
+
+  }
 }
 
 // Consigue todos los recursos (videos, PDF, etc.) que pertenecen a un curso determinado.
-export async function getCourseResources(courseId: number): Promise<Resource[]> {
-  const { data } = await apiClient.get<Resource[]>(
-    `/api/courses/${courseId}/resources`,
-  )
-  return data
+export async function getCourseResources(
+  courseId: number,
+): Promise<Resource[]> {
+
+  try {
+
+    const { data } = await apiClient.get<Resource[]>(
+      `/api/courses/${courseId}/resources`,
+    )
+
+    await saveResources(data)
+
+    return data
+
+  } catch {
+
+    const resources = await getCachedResources()
+
+    return resources.filter(resource => resource.courseId === courseId)
+
+  }
 }
 
-// Registra que un estudiante leyó/completó un recurso.
-// Esto avisa al backend (Spring Boot), el cual procesa el progreso usando hilos concurrentes
-// y manda un mensaje a RabbitMQ para avisar al servicio de recomendaciones de Python.
 export async function completeResource(
   studentId: number,
   resourceId: number,
 ): Promise<void> {
+
+  const operation = {
+    type: 'COMPLETE_RESOURCE' as const,
+    payload: {
+      studentId,
+      resourceId,
+    },
+    createdAt: new Date().toISOString(),
+  }
+
+  if (!navigator.onLine) {
+    await addPendingOperation(operation)
+    return
+  }
+
   await apiClient.post(
     `/api/students/${studentId}/resources/${resourceId}/complete`,
   )

@@ -1,3 +1,4 @@
+
 // Representa una Materia académica (por ejemplo: Computación, Diseño, etc.)
 export type Subject = {
   id: number
