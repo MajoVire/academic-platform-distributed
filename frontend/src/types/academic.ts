@@ -54,3 +54,27 @@ export type StudentRecommendationsResponse = {
   studentId: number
   recommendations: Recommendation[]
 }
+
+// Evento que llega por WebSocket cuando el worker de Python genera una recomendación.
+export type RecommendationGeneratedEvent = {
+  eventId: string
+  eventType: 'RECOMMENDATION_GENERATED'
+  studentId: number
+  status: string
+  message: string
+  timestamp: string
+
+  subjectId: number
+  courseId: number
+  resourceId: number
+  resourceTitle: string
+
+  completedAt: string
+  generatedAt: string
+  sourceEventType: string
+
+  recommendation: {
+    title: string
+    reason: string
+  }
+}

@@ -5,7 +5,6 @@ import type { Recommendation } from '../types/academic'
 import RecommendationCard from '../components/ui/RecommendationCard'
 import { IoSparklesOutline } from 'react-icons/io5'
 import { useRecommendationNotifications } from '../hooks/useRecommendationNotifications'
-
 // =========================================================================
 // PÁGINA DE RECOMENDACIONES DE INTELIGENCIA ARTIFICIAL
 // Esta página consume la API de Python FastAPI. El motor inteligente de Python
@@ -127,6 +126,40 @@ export function RecommendationsPage() {
     </div>
   )}
 </div>
+
+<div
+  className={`p-3 rounded-xl text-sm ${
+    connected
+      ? 'bg-green-100 text-green-700'
+      : 'bg-red-100 text-red-700'
+  }`}
+>
+  {connected
+    ? '🟢 WebSocket conectado'
+    : '🔴 WebSocket desconectado'}
+</div>
+
+
+{notification && (
+  <div className="p-4 rounded-xl border border-blue-300 bg-blue-50">
+    <h3 className="font-bold">
+      Nueva recomendación recibida
+    </h3>
+
+    <p>{notification.message}</p>
+
+    <p className="mt-2">
+      <strong>Curso recomendado:</strong>{' '}
+      {notification.recommendation.title}
+    </p>
+
+    <p>
+      <strong>Motivo:</strong>{' '}
+      {notification.recommendation.reason}
+    </p>
+  </div>
+)}
+
 
       {error && (
         <div className="p-4 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 text-sm">
