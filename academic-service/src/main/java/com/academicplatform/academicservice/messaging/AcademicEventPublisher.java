@@ -30,12 +30,20 @@ public class AcademicEventPublisher {
     public void publishResourceCompleted(ResourceCompletedEvent event) {
         try {
             logger.info(
-                    "Publishing {} to exchange {} on thread {}",
+                    "Publishing {} for student {} resource {} to exchange {} with routing key {} on thread {}",
                     event.eventType(),
+                    event.studentId(),
+                    event.resourceId(),
                     academicEventsExchange.getName(),
+                    properties.routingKey(),
                     Thread.currentThread().getName());
             rabbitTemplate.convertAndSend(properties.exchange(), properties.routingKey(), event);
-            logger.info("Published RESOURCE_COMPLETED for student {} resource {}", event.studentId(), event.resourceId());
+            logger.info(
+                    "Published RESOURCE_COMPLETED for student {} resource {} to exchange {} with routing key {}",
+                    event.studentId(),
+                    event.resourceId(),
+                    properties.exchange(),
+                    properties.routingKey());
         } catch (AmqpException exception) {
             logger.error(
                     "Failed to publish RESOURCE_COMPLETED for student {} resource {}: {}",

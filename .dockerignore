@@ -22,6 +22,9 @@ recommendation-worker/*
 !recommendation-worker/Dockerfile
 !recommendation-worker/worker.py
 !recommendation-worker/requirements.txt
+!recommendation-worker/app/
+recommendation-worker/app/*
+!recommendation-worker/app/events.py
 !recommendation-service/
 recommendation-service/*
 !recommendation-service/app/
