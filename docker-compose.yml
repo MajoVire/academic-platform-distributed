@@ -115,8 +115,8 @@ services:
 
       RABBITMQ_HOST: ${RABBITMQ_HOST:-rabbitmq}
       RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
-      RABBITMQ_USERNAME: guest
-      RABBITMQ_PASSWORD: change_this_rabbitmq_password
+      RABBITMQ_USERNAME: ${RABBITMQ_HOST:-guest}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-change_this_rabbitmq_password}
 
       ACADEMIC_NOTIFICATIONS_EXCHANGE: ${ACADEMIC_NOTIFICATIONS_EXCHANGE:-academic.notifications.exchange}
       ACADEMIC_RECOMMENDATION_GENERATED_ROUTING_KEY: ${ACADEMIC_RECOMMENDATION_GENERATED_ROUTING_KEY:-academic.recommendation.generated}
