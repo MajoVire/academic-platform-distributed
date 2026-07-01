@@ -10,5 +10,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY recommendation-worker/worker.py ./worker.py
 COPY recommendation-service/app ./app
+COPY recommendation-worker/app/events.py ./app/events.py
 
 CMD ["python", "worker.py"]
