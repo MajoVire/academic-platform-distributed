@@ -67,7 +67,7 @@ academic-service ── RabbitMQ ──► recommendation-worker
 
 Seguridad (OAuth2):
 Frontend ── Token ──► Keycloak
-Frontend ── Bearer JWT ──► academic-service
+Frontend ── Bearer JWT ──► academic - service
 ```
 
 ---
