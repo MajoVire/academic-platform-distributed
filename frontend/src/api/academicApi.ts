@@ -66,3 +66,17 @@ export async function getCatalogResourceCountApi(): Promise<number> {
   const { data } = await apiClient.get<number>('/api/catalog/resources/count')
   return data
 }
+
+export async function enrollInCourse(studentId: number, courseId: number): Promise<void> {
+  await apiClient.post(`/api/students/${studentId}/courses/${courseId}/enroll`)
+}
+
+export async function getProfessorStudents(professorId: number): Promise<number[]> {
+  const { data } = await apiClient.get<number[]>(`/api/professors/${professorId}/students`)
+  return data
+}
+
+export async function getStudentEnrolledCourses(studentId: number): Promise<number[]> {
+  const { data } = await apiClient.get<number[]>(`/api/students/${studentId}/courses`)
+  return data
+}

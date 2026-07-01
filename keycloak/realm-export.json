@@ -75,6 +75,23 @@
       ]
     },
     {
+      "username": "professor",
+      "enabled": true,
+      "email": "professor@academic.local",
+      "firstName": "Test",
+      "lastName": "Professor",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "professor",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "PROFESSOR"
+      ]
+    },
+    {
       "username": "student",
       "enabled": true,
       "email": "student@academic.local",
@@ -93,3 +110,4 @@
     }
   ]
 }
+

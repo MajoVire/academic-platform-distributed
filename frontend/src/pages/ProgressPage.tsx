@@ -3,6 +3,8 @@ import { useParams } from 'react-router'
 import {
   getCatalogResourceCountApi,
   getStudentProgress,
+  getStudentEnrolledCourses,
+  getCourseResources,
 } from '../api/academicApi'
 import ProgressCircle from '../components/ui/ProgressCircle'
 import ProgressBar from '../components/ui/ProgressBar'
@@ -46,39 +48,48 @@ const IsometricProgressIllustration = () => (
   </svg>
 )
 
+import { useAuth } from '../context/AuthProvider'
+
 export function ProgressPage() {
   // Obtenemos de forma opcional el id del estudiante desde la URL si existiera
   const { studentId } = useParams<{ studentId?: string }>()
+  const { numericUserId } = useAuth()
   
   // Estados para almacenar la información del progreso, la carga y posibles errores
   const [progress, setProgress] = useState<ProgressViewModel | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Si no se especifica un estudiante en la URL, usamos el estudiante 1 por defecto
-  // TODO: Mapear usuario de Keycloak a ID de PostgreSQL
-  const defaultStudentId = studentId ? parseInt(studentId, 10) : 1
+  // Si no se especifica un estudiante en la URL, usamos el ID numérico del estudiante autenticado
+  const defaultStudentId = studentId ? parseInt(studentId, 10) : numericUserId
 
   // Al cargar la página, llamamos a la API para traer las métricas del estudiante
   useEffect(() => {
     const fetchProgress = async () => {
       try {
         setLoading(true)
-        const [studentProgress, catalogResourceCount] = await Promise.all([
+        const [studentProgress, enrolledCourses] = await Promise.all([
           getStudentProgress(defaultStudentId),
-          getCatalogResourceCountApi(),
+          getStudentEnrolledCourses(defaultStudentId),
         ])
+
+        let actualResourceCount = 0
+        if (enrolledCourses && enrolledCourses.length > 0) {
+          const resourcePromises = enrolledCourses.map(courseId => getCourseResources(courseId))
+          const courseResourcesLists = await Promise.all(resourcePromises)
+          actualResourceCount = courseResourcesLists.reduce((sum, resources) => sum + resources.length, 0)
+        }
 
         const completedResources = studentProgress.totalCompletedResources
         const percentage =
-          catalogResourceCount > 0
-            ? Math.round((completedResources / catalogResourceCount) * 100)
+          actualResourceCount > 0
+            ? Math.round((completedResources / actualResourceCount) * 100)
             : 0
 
         setProgress({
           studentId: studentProgress.studentId,
           completedResources,
-          totalResources: catalogResourceCount,
+          totalResources: actualResourceCount,
           percentage,
           lastCompletedAt: studentProgress.lastCompletedAt,
         })
@@ -151,7 +162,11 @@ export function ProgressPage() {
                   Resumen de Logros
                 </h2>
                 <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                  Actualmente has finalizado <span className="font-bold text-blue-600 dark:text-blue-400">{progress.completedResources}</span> de un total de <span className="font-bold text-slate-700 dark:text-slate-300">{progress.totalResources}</span> recursos de aprendizaje asignados a tu plan de estudio de Computación.
+                  {progress.totalResources === 0 ? (
+                    <span>Aún no te has inscrito en ningún curso. ¡Explora el catálogo para comenzar!</span>
+                  ) : (
+                    <span>Actualmente has finalizado <span className="font-bold text-blue-600 dark:text-blue-400">{progress.completedResources}</span> de un total de <span className="font-bold text-slate-700 dark:text-slate-300">{progress.totalResources}</span> recursos de aprendizaje asignados a tus cursos inscritos.</span>
+                  )}
                 </p>
                 {progress.lastCompletedAt && (
                   <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">

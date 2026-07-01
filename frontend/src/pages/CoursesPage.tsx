@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
-import { useParams, Link } from 'react-router'
-import { getSubjectCourses, getSubjects } from '../api/academicApi'
+import { useParams, Link, useNavigate } from 'react-router'
+import { getSubjectCourses, getSubjects, enrollInCourse } from '../api/academicApi'
 import type { Course, Subject } from '../types/academic'
+import { useAuth } from '../context/AuthProvider'
 import CourseCard from '../components/ui/CourseCard'
 import { IoChevronBackOutline } from 'react-icons/io5'
 
@@ -11,20 +12,12 @@ import { IoChevronBackOutline } from 'react-icons/io5'
 // (filtrando por subjectId que viene en los parámetros de la URL).
 // =========================================================================
 
-// Importación de imágenes de cursos reales desde assets para que no haya imágenes rotas.
-import sistemasDistribuidosImg from '../assets/sistemasDistribuidos.png'
-import mensajeriaYColasImg from '../assets/mensajeriaYColas.png'
-import disenosoftwareImg from '../assets/disenosoftware.png'
-
-// Diccionario de imágenes asociadas al ID de cada curso para dibujarlas dinámicamente.
-const courseImageMap: Record<number, string> = {
-  1: sistemasDistribuidosImg,
-  2: mensajeriaYColasImg,
-  3: disenosoftwareImg,
-}
-
+import { courseImageMap } from '../utils/courseImages'
 
 export function CoursesPage() {
+  const navigate = useNavigate()
+  const { userId, numericUserId, hasRole } = useAuth()
+  
   // Obtiene el ID de la materia actual desde la URL (ej. /subjects/1/courses -> subjectId es "1")
   const { subjectId } = useParams<{ subjectId?: string }>()
   
@@ -112,15 +105,25 @@ export function CoursesPage() {
           ))
         ) : courses.length > 0 ? (
           courses.map((course) => (
-            <CourseCard
-              key={course.id}
-              id={course.id}
-              title={course.title}
-              description={course.description || ''}
-              imageUrl={courseImageMap[course.id]}
-              resourceCount={course.id === 1 ? 2 : course.id === 2 ? 2 : course.id === 3 ? 1 : undefined} // Contar semánticamente según init.sql
-              to={`/courses/${course.id}/resources`}
-            />
+              <CourseCard
+                key={course.id}
+                id={course.id}
+                title={course.title}
+                description={course.description || ''}
+                imageUrl={courseImageMap[course.id]}
+                resourceCount={course.id === 1 ? 2 : course.id === 2 ? 2 : course.id === 3 ? 1 : undefined}
+                actionLabel={hasRole('STUDENT') ? 'Inscribirme' : 'Ver Curso'}
+                onClick={async () => {
+                  try {
+                    if (userId) {
+                      await enrollInCourse(numericUserId, course.id)
+                    }
+                  } catch (e) {
+                    console.error("Error al inscribirse:", e)
+                  }
+                  navigate(`/courses/${course.id}/resources`)
+                }}
+              />
           ))
         ) : (
           !error && (

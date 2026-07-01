@@ -167,8 +167,10 @@ Responsabilidades principales:
 - Consultar materias.
 - Consultar cursos complementarios por materia.
 - Consultar recursos de aprendizaje por curso.
+- Inscribir estudiantes a cursos.
+- Consultar los cursos inscritos por estudiante.
 - Registrar recursos completados por estudiantes.
-- Consultar progreso académico básico.
+- Consultar progreso académico básico vinculado a la sesión del estudiante.
 - Ejecutar tareas concurrentes mediante hilos.
 - Publicar eventos académicos en RabbitMQ.
 - Consultar recomendaciones desde el servicio Python.

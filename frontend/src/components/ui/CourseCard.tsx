@@ -10,6 +10,8 @@ interface CourseCardProps {
   imageUrl?: string // URL de la imagen de portada.
   resourceCount?: number // Cantidad opcional de recursos asociados a este curso.
   to?: string // Ruta URL opcional si queremos que la tarjeta sea un enlace clickeable.
+  onClick?: () => void
+  actionLabel?: string // Etiqueta para un botón de acción opcional.
 }
 
 export function CourseCard({
@@ -19,6 +21,8 @@ export function CourseCard({
   imageUrl,
   resourceCount,
   to,
+  onClick,
+  actionLabel,
 }: CourseCardProps) {
   // Estado local para manejar si ocurre un error al cargar la imagen, para poder poner un marcador de posición de respaldo.
   const [imageError, setImageError] = useState(false)
@@ -89,6 +93,13 @@ export function CourseCard({
             {resourceCount} {resourceCount === 1 ? 'recurso' : 'recursos'}
           </div>
         )}
+        
+        {/* Botón de acción explícito */}
+        {actionLabel && (
+          <div className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl text-center text-sm transition-colors shadow-sm">
+            {actionLabel}
+          </div>
+        )}
       </div>
     </div>
   )
@@ -99,6 +110,15 @@ export function CourseCard({
       <Link to={to} className="block h-full no-underline">
         {cardContent}
       </Link>
+    )
+  }
+
+  // Si tiene onClick, lo usamos
+  if (onClick) {
+    return (
+      <button onClick={onClick} className="block h-full w-full text-left no-underline cursor-pointer focus:outline-none">
+        {cardContent}
+      </button>
     )
   }
 

@@ -8,9 +8,8 @@ import { registerSW } from 'virtual:pwa-register'
 // Busca el elemento HTML con id="root" en el archivo index.html
 // y "renderiza" (dibuja) nuestra aplicación dentro de él.
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    {/* StrictMode nos ayuda a encontrar problemas en el código durante el desarrollo. */}
+  <>
     <App />
-  </StrictMode>,
+  </>
 )
 registerSW()
