@@ -1,5 +1,6 @@
 import { Server as HttpServer } from 'http'
 import { Server } from 'socket.io'
+import { registerStudentSocketHandlers } from '../services/notification.service.js'
 
 let io: Server
 
@@ -13,6 +14,7 @@ export function initializeSocketServer(server: HttpServer): Server {
 
   io.on('connection', (socket) => {
     console.log(`[WebSocket] Cliente conectado: ${socket.id}`)
+    registerStudentSocketHandlers(socket)
 
     socket.on('disconnect', () => {
       console.log(`[WebSocket] Cliente desconectado: ${socket.id}`)

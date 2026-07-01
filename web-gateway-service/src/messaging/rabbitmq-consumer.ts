@@ -1,5 +1,7 @@
-        import amqp from 'amqplib'
+import amqp from 'amqplib'
+import { emitRecommendationGenerated } from '../services/notification.service.js'
 import { getSocketServer } from '../realtime/socket-server.js'
+import type { RecommendationGeneratedEvent } from '../types/event.js'
 
 export async function initializeRabbitMQConsumer() {
   try {
@@ -13,68 +15,58 @@ export async function initializeRabbitMQConsumer() {
     const channel = await connection.createChannel()
 
     const exchange =
-    process.env.ACADEMIC_NOTIFICATIONS_EXCHANGE ??
-    'academic.notifications.exchange'
+      process.env.ACADEMIC_NOTIFICATIONS_EXCHANGE ??
+      'academic.notifications.exchange'
 
     const queue = 'academic.notifications.queue'
 
     const routingKey =
-    process.env.ACADEMIC_RECOMMENDATION_GENERATED_ROUTING_KEY ??
-    'academic.recommendation.generated'
+      process.env.ACADEMIC_RECOMMENDATION_GENERATED_ROUTING_KEY ??
+      'academic.recommendation.generated'
 
     await channel.assertExchange(exchange, 'topic', {
-    durable: true,
+      durable: true,
     })
 
     await channel.assertQueue(queue, {
-    durable: true,
+      durable: true,
     })
 
-    await channel.bindQueue(
-    queue,
-    exchange,
-    routingKey,
-    )
+    await channel.bindQueue(queue, exchange, routingKey)
 
-    console.log(
-    `[RabbitMQ] Cola ${queue} enlazada al exchange ${exchange}`,
-    )
+    console.log(`[RabbitMQ] Cola ${queue} enlazada al exchange ${exchange}`)
 
     const io = getSocketServer()
     console.log('[RabbitMQ] Conexión establecida correctamente.')
 
     await channel.consume(queue, (message) => {
-  if (!message) return
+      if (!message) return
 
-  try {
-    const event = JSON.parse(message.content.toString())
+      try {
+        const event = JSON.parse(
+          message.content.toString(),
+        ) as RecommendationGeneratedEvent
 
-    console.log(
-      '[RabbitMQ] Evento recibido:',
-      event.eventType,
-    )
+        console.log('[RabbitMQ] Evento recibido:', event.eventType)
 
-    io.emit('recommendation-generated', event)
+        if (event.eventType !== 'RECOMMENDATION_GENERATED') {
+          throw new Error(
+            `eventType no soportado: ${event.eventType}`,
+          )
+        }
 
-    console.log(
-      `[WebSocket] Notificación enviada al estudiante ${event.studentId}`,
-    )
+        emitRecommendationGenerated(io, event)
 
-    channel.ack(message)
-  } catch (error) {
-    console.error(
-      '[RabbitMQ] Error procesando mensaje:',
-      error,
-    )
+        channel.ack(message)
+      } catch (error) {
+        console.error('[RabbitMQ] Error procesando mensaje:', error)
 
-    channel.nack(message, false, false)
-  }
-})
+        channel.nack(message, false, false)
+      }
+    })
 
     return { connection, channel }
   } catch (error) {
     console.error('[RabbitMQ] Error al conectar:', error)
   }
-
-  
 }

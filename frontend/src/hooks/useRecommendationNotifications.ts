@@ -2,45 +2,89 @@ import { useEffect, useState } from 'react'
 import { connectSocket } from '../realtime/socketClient'
 import type { RecommendationGeneratedEvent } from '../types/academic'
 
+const REGISTER_STUDENT_EVENT = 'register-student'
+const RECOMMENDATION_GENERATED_EVENT = 'recommendation-generated'
 
+function normalizeStudentId(value: number): number | null {
+  return Number.isInteger(value) && value > 0 ? value : null
+}
 
-export function useRecommendationNotifications() {
+export function useRecommendationNotifications(studentId: number) {
   const [connected, setConnected] = useState(false)
   const [notification, setNotification] =
-  useState<RecommendationGeneratedEvent | null>(null)
+    useState<RecommendationGeneratedEvent | null>(null)
 
   useEffect(() => {
-    const socket = connectSocket()
+    const normalizedStudentId = normalizeStudentId(studentId)
 
-    socket.on('connect', () => {
-      console.log('[WebSocket] Conectado')
-      setConnected(true)
-    })
-
-    socket.on('disconnect', () => {
-      console.log('[WebSocket] Desconectado')
+    if (normalizedStudentId === null) {
+      console.warn(
+        '[WebSocket] studentId inválido para notificaciones:',
+        studentId,
+      )
       setConnected(false)
-    })
+      setNotification(null)
+      return undefined
+    }
 
-    socket.on(
-      'recommendation-generated',
-      (data: RecommendationGeneratedEvent) => {
-        console.log('[WebSocket] Evento recibido:', data)
+    const socket = connectSocket()
+    const studentRoom = `student:${normalizedStudentId}`
 
-        console.log(
-          `[WebSocket] Recomendación: ${data.recommendation.title}`,
+    const registerStudent = () => {
+      socket.emit(REGISTER_STUDENT_EVENT, {
+        studentId: String(normalizedStudentId),
+      })
+
+      console.log(`[WebSocket] Registrado en ${studentRoom}`)
+    }
+
+    const handleConnect = () => {
+      setConnected(true)
+      registerStudent()
+    }
+
+    const handleDisconnect = () => {
+      setConnected(false)
+    }
+
+    const handleRecommendation = (
+      data: RecommendationGeneratedEvent,
+    ) => {
+      if (data.studentId !== normalizedStudentId) {
+        console.warn(
+          '[WebSocket] Evento ignorado por studentId no coincidente',
+          {
+            expected: normalizedStudentId,
+            received: data.studentId,
+          },
         )
+        return
+      }
 
-        setNotification(data)
-      },
-    )
+      console.log('[WebSocket] Evento recibido:', data)
+      console.log(
+        `[WebSocket] Recomendación: ${data.recommendation.title}`,
+      )
+
+      setNotification(data)
+    }
+
+    setNotification(null)
+    socket.on('connect', handleConnect)
+    socket.on('disconnect', handleDisconnect)
+    socket.on(RECOMMENDATION_GENERATED_EVENT, handleRecommendation)
+
+    if (socket.connected) {
+      setConnected(true)
+      registerStudent()
+    }
 
     return () => {
-      socket.off('connect')
-      socket.off('disconnect')
-      socket.off('recommendation-generated')
+      socket.off('connect', handleConnect)
+      socket.off('disconnect', handleDisconnect)
+      socket.off(RECOMMENDATION_GENERATED_EVENT, handleRecommendation)
     }
-  }, [])
+  }, [studentId])
 
   return {
     connected,
