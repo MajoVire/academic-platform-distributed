@@ -708,6 +708,12 @@ Documentación del flujo distribuido:
 docs/demo-flow.md
 ```
 
+Evidencias de despliegue HTTPS y acceso público:
+
+```text
+docs/evidencias.md
+```
+
 ---
 
 ## Pruebas
@@ -833,6 +839,26 @@ El sistema puede ampliarse posteriormente con:
 - Panel administrativo.
 - Orquestación con Kubernetes.
 - Mayor lógica de recomendaciones.
+
+---
+
+## Despliegue HTTPS y demo pública
+
+La exposición pública documentada utiliza Cloudflare Tunnel como capa HTTPS para la demo.
+
+Puntos clave:
+
+- URL pública capturada: `https://captain-assets-jet-sorry.trycloudflare.com`
+- Comando usado: `cloudflared tunnel --url http://localhost:5173`
+- Evidencias: [docs/evidencias.md](docs/evidencias.md)
+
+Variables de producción sugeridas para esta capa:
+
+- `NODE_ENV=production`
+- `GATEWAY_CORS_ORIGIN=https://<tu-dominio-publico>`
+- `VITE_API_BASE_URL=https://<tu-dominio-publico>`
+- `VITE_GATEWAY_URL=https://<tu-dominio-publico>`
+- `VITE_KEYCLOAK_URL=https://<tu-keycloak-publico>`
 
 ---
 

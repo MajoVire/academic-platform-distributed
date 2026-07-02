@@ -212,3 +212,36 @@ El flujo demuestra:
 - Desacoplamiento de servicios
 - Arquitectura distribuida
 - Uso de Docker
+
+---
+
+# Acceso a la demo
+
+## URLs locales
+
+- Frontend: `http://localhost:5173`
+- API Gateway: `http://localhost:3000`
+- academic-service: `http://localhost:8080`
+- recommendation-service: `http://localhost:8000`
+- Keycloak: `http://localhost:8180`
+- RabbitMQ Management: `http://localhost:15672`
+
+## URL pública documentada
+
+- `https://captain-assets-jet-sorry.trycloudflare.com`
+
+## Comando de publicación
+
+```bash
+cloudflared tunnel --url http://localhost:5173
+```
+
+## Variables de producción sugeridas
+
+- `NODE_ENV=production`
+- `GATEWAY_CORS_ORIGIN=https://<tu-dominio-publico>`
+- `VITE_API_BASE_URL=https://<tu-dominio-publico>`
+- `VITE_GATEWAY_URL=https://<tu-dominio-publico>`
+- `VITE_KEYCLOAK_URL=https://<tu-keycloak-publico>`
+- `KEYCLOAK_ISSUER_URI=https://<tu-keycloak-publico>/realms/academic-platform`
+- `KEYCLOAK_JWK_SET_URI=https://<tu-keycloak-publico>/realms/academic-platform/protocol/openid-connect/certs`
