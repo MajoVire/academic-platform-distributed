@@ -26,7 +26,7 @@ spec:
       terminationGracePeriodSeconds: 30
       containers:
         - name: web-gateway-service
-          image: academic-platform/web-gateway-service:1.0.0
+          image: academic-platform/web-gateway-service:1.0.1
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
