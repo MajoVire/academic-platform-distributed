@@ -191,3 +191,44 @@ En Kubernetes deben pasarse estas variables al deployment del worker:
 - `RECOMMENDATION_WORKER_ACADEMIC_SERVICE_TIMEOUT_SECONDS`
 
 `academic-service` necesita las variables de RabbitMQ de entrada para publicar `RESOURCE_COMPLETED`. El worker necesita tanto las variables de entrada como las de salida.
+
+## Escalado automático del worker
+
+El `recommendation-worker` se escala con un `HorizontalPodAutoscaler` basado en CPU. Para que el HPA funcione en Minikube, el clúster debe exponer `metrics-server`.
+
+En Kubernetes, el script usa por defecto el usuario `academic_platform_rabbitmq`. Si lo ejecutas contra Docker Compose, sobrescribe `RABBITMQ_USERNAME=guest`.
+
+Verificación rápida:
+
+```bash
+kubectl get hpa -n academic-platform
+kubectl top pods -n academic-platform
+```
+
+Si `kubectl top` no responde, habilita métricas en Minikube:
+
+```bash
+minikube addons enable metrics-server
+```
+
+### Prueba de carga
+
+Para generar carga sobre el worker y forzar el escalado:
+
+```bash
+bash scripts/load-test-recommendation-worker.sh
+```
+
+Variables útiles:
+
+```bash
+TOTAL_MESSAGES=80 CONCURRENCY=8 bash scripts/load-test-recommendation-worker.sh
+```
+
+La prueba publica eventos `RESOURCE_COMPLETED` directamente en RabbitMQ para saturar el consumidor y observar el crecimiento de `recommendation-worker`.
+
+En Kubernetes, expone antes RabbitMQ Management:
+
+```bash
+kubectl port-forward svc/rabbitmq 15672:15672 -n academic-platform
+```
