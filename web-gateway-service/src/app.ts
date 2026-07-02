@@ -4,6 +4,7 @@ import helmet from 'helmet'
 import morgan from 'morgan'
 import { createAcademicServiceClient } from './clients/academic-service.client.js'
 import { loadGatewayConfig, type GatewayConfig } from './config/env.js'
+import { createKeycloakJwtVerifier, type TokenVerifier } from './middleware/auth.js'
 import { errorHandler } from './middleware/error-handler.js'
 import { notFoundHandler } from './middleware/not-found.js'
 import { createGatewayRouter } from './routes/gateway.routes.js'
@@ -12,6 +13,7 @@ import type { AcademicServiceClient } from './clients/academic-service.client.js
 export interface CreateAppDependencies {
   config?: GatewayConfig
   academicServiceClient?: AcademicServiceClient
+  tokenVerifier?: TokenVerifier
 }
 
 export function createApp(dependencies: CreateAppDependencies = {}) {
@@ -21,6 +23,12 @@ export function createApp(dependencies: CreateAppDependencies = {}) {
     createAcademicServiceClient({
       baseUrl: config.academicServiceUrl,
       timeoutMs: config.requestTimeoutMs,
+    })
+  const tokenVerifier =
+    dependencies.tokenVerifier ??
+    createKeycloakJwtVerifier({
+      issuerUri: config.keycloakIssuerUri,
+      jwkSetUri: config.keycloakJwkSetUri,
     })
 
   const app = express()
@@ -44,7 +52,7 @@ export function createApp(dependencies: CreateAppDependencies = {}) {
     })
   })
 
-  app.use('/api', createGatewayRouter({ academicServiceClient }))
+  app.use('/api', createGatewayRouter({ academicServiceClient, tokenVerifier }))
   app.use(notFoundHandler)
   app.use(errorHandler)
 

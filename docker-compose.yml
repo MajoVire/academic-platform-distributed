@@ -84,7 +84,8 @@ services:
       ACADEMIC_EVENTS_QUEUE: ${ACADEMIC_EVENTS_QUEUE:-academic.events.queue}
       ACADEMIC_RESOURCE_COMPLETED_ROUTING_KEY: ${ACADEMIC_RESOURCE_COMPLETED_ROUTING_KEY:-academic.resource.completed}
       RECOMMENDATION_SERVICE_URL: http://recommendation-service:8000
-      KEYCLOAK_ISSUER_URI: http://localhost:8180/realms/academic-platform
+      KEYCLOAK_ISSUER_URI: ${KEYCLOAK_ISSUER_URI:-http://localhost:8180/realms/academic-platform}
+      KEYCLOAK_JWK_SET_URI: ${KEYCLOAK_JWK_SET_URI:-http://keycloak:8080/realms/academic-platform/protocol/openid-connect/certs}
     extra_hosts:
       - "localhost:host-gateway"
     ports:
@@ -112,6 +113,8 @@ services:
       GATEWAY_CORS_ORIGIN: ${GATEWAY_CORS_ORIGIN:-http://localhost:5173}
       REQUEST_TIMEOUT_MS: ${REQUEST_TIMEOUT_MS:-5000}
       NODE_ENV: ${NODE_ENV:-development}
+      KEYCLOAK_ISSUER_URI: ${KEYCLOAK_ISSUER_URI:-http://localhost:8180/realms/academic-platform}
+      KEYCLOAK_JWK_SET_URI: ${KEYCLOAK_JWK_SET_URI:-http://keycloak:8080/realms/academic-platform/protocol/openid-connect/certs}
 
       RABBITMQ_HOST: ${RABBITMQ_HOST:-rabbitmq}
       RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}

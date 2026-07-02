@@ -1,4 +1,4 @@
-import type { Request, RequestHandler, Response } from 'express'
+import type { Request, RequestHandler } from 'express'
 import type { AcademicServiceClient } from '../clients/academic-service.client.js'
 import { sendUpstreamResponse } from '../utils/http.js'
 import { parsePositiveInteger } from '../utils/validation.js'
