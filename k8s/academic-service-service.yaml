@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: academic-service
+  namespace: academic-platform
+  labels:
+    app.kubernetes.io/name: academic-service
+    app.kubernetes.io/part-of: academic-platform
+    app.kubernetes.io/component: backend
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: academic-service
+    app.kubernetes.io/part-of: academic-platform
+    app.kubernetes.io/component: backend
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+      protocol: TCP

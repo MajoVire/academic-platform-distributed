@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: academic-platform
+  labels:
+    app.kubernetes.io/name: frontend
+    app.kubernetes.io/part-of: academic-platform
+    app.kubernetes.io/component: frontend
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: frontend
+    app.kubernetes.io/part-of: academic-platform
+    app.kubernetes.io/component: frontend
+  ports:
+    - name: http
+      port: 5173
+      targetPort: 5173
+      protocol: TCP

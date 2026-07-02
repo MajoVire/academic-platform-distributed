@@ -1,6 +1,7 @@
 package com.academicplatform.academicservice.repository;
 
 import java.util.List;
+import java.time.LocalDateTime;
 
 import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -36,7 +37,11 @@ public class JdbcAcademicActivityRepository implements AcademicActivityRepositor
                 activity.resourceId(),
                 activity.resourceTitle(),
                 "RESOURCE_COMPLETED",
-                String.format("Student %s completed resource '%s'", activity.studentId(), activity.resourceTitle()),
+                String.format(
+                        "Student %s completed resource '%s' on thread %s",
+                        activity.studentId(),
+                        activity.resourceTitle(),
+                        activity.threadName()),
                 activity.threadName(),
                 activity.completedAt());
     }
@@ -53,7 +58,7 @@ public class JdbcAcademicActivityRepository implements AcademicActivityRepositor
                         rs.getLong("student_id"),
                         rs.getLong("resource_id"),
                         rs.getString("resource_title"),
-                        rs.getObject("completed_at", java.time.LocalDateTime.class),
+                        rs.getObject("completed_at", LocalDateTime.class),
                         rs.getString("thread_name")));
     }
 }

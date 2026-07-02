@@ -42,6 +42,18 @@ const IsometricAIIllustration = () => (
 )
 
 export function RecommendationsPage() {
+  function resolveStudentId(rawStudentId?: string): number {
+    if (!rawStudentId) {
+      return 1
+    }
+
+    const parsedStudentId = Number.parseInt(rawStudentId, 10)
+
+    return Number.isInteger(parsedStudentId) && parsedStudentId > 0
+      ? parsedStudentId
+      : 1
+  }
+
   // Obtenemos de manera opcional el ID del estudiante desde la URL si existiera
   const { studentId } = useParams<{ studentId?: string }>()
 
@@ -53,8 +65,9 @@ export function RecommendationsPage() {
 
   // Por defecto usamos el estudiante con ID 1 en la simulación académica
   // TODO: Mapear usuario de Keycloak a ID de PostgreSQL
-  const defaultStudentId = studentId ? parseInt(studentId, 10) : 1
-  const { connected, notification } = useRecommendationNotifications()
+  const defaultStudentId = resolveStudentId(studentId)
+  const { connected, notification } =
+    useRecommendationNotifications(defaultStudentId)
 
   // Al cargar el componente o cambiar de estudiante, llamamos a la API de FastAPI (Python)
   useEffect(() => {

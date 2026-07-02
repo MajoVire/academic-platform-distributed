@@ -2,10 +2,14 @@ package com.academicplatform.academicservice.repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 import org.springframework.context.annotation.Profile;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.academicplatform.academicservice.model.Course;
 import com.academicplatform.academicservice.model.Resource;
@@ -14,6 +18,10 @@ import com.academicplatform.academicservice.model.Subject;
 @Repository
 @Profile("postgres")
 public class JdbcAcademicCatalogRepository implements AcademicCatalogRepository {
+
+    private static final Logger logger = LoggerFactory.getLogger(JdbcAcademicCatalogRepository.class);
+    private static final String DEFAULT_COURSE_TITLE_COLUMN = "title";
+    private static final String LEGACY_COURSE_TITLE_COLUMN = "name";
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -44,26 +52,26 @@ public class JdbcAcademicCatalogRepository implements AcademicCatalogRepository 
 
     @Override
     public List<Course> findCoursesBySubjectId(Long subjectId) {
-        return jdbcTemplate.query(
-                "SELECT id, subject_id, title, description FROM courses WHERE subject_id = ? ORDER BY id",
+        return executeCourseQuery(titleColumn -> jdbcTemplate.query(
+                courseQuery("SELECT id, subject_id, %s AS title, description FROM courses WHERE subject_id = ? ORDER BY id", titleColumn),
                 (rs, rowNum) -> new Course(
                         rs.getLong("id"),
                         rs.getLong("subject_id"),
                         rs.getString("title"),
                         rs.getString("description")),
-                subjectId);
+                subjectId));
     }
 
     @Override
     public Optional<Course> findCourseById(Long courseId) {
-        return jdbcTemplate.query(
-                "SELECT id, subject_id, title, description FROM courses WHERE id = ?",
+        return executeCourseQuery(titleColumn -> jdbcTemplate.query(
+                courseQuery("SELECT id, subject_id, %s AS title, description FROM courses WHERE id = ?", titleColumn),
                 (rs, rowNum) -> new Course(
                         rs.getLong("id"),
                         rs.getLong("subject_id"),
                         rs.getString("title"),
                         rs.getString("description")),
-                courseId).stream().findFirst();
+                courseId).stream().findFirst());
     }
 
     @Override
@@ -96,5 +104,27 @@ public class JdbcAcademicCatalogRepository implements AcademicCatalogRepository 
     public long countAllResources() {
         Long count = jdbcTemplate.queryForObject("SELECT COUNT(id) FROM resources", Long.class);
         return count != null ? count : 0L;
+    }
+
+    private <T> T executeCourseQuery(Function<String, T> queryFunction) {
+        try {
+            return queryFunction.apply(DEFAULT_COURSE_TITLE_COLUMN);
+        } catch (DataAccessException exception) {
+            logger.warn(
+                    "La consulta de courses con la columna 'title' falló. Reintentando con la columna de compatibilidad 'name'.",
+                    exception);
+            try {
+                return queryFunction.apply(LEGACY_COURSE_TITLE_COLUMN);
+            } catch (DataAccessException legacyException) {
+                logger.error(
+                        "La consulta de courses también falló con la columna de compatibilidad 'name'.",
+                        legacyException);
+                throw legacyException;
+            }
+        }
+    }
+
+    private String courseQuery(String queryTemplate, String courseTitleColumn) {
+        return String.format(queryTemplate, courseTitleColumn);
     }
 }
