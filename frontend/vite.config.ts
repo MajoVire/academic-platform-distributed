@@ -40,6 +40,7 @@ export default defineConfig({
   ],
   server: {
     host: true, // Listen on all network interfaces
+    allowedHosts: true,
     proxy: {
       '/api': {
         target: process.env.VITE_API_PROXY_TARGET || 'http://localhost:3000',
