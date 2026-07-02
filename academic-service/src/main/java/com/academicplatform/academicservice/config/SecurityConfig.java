@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.GrantedAuthority;
@@ -29,6 +30,18 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/api/health").permitAll()
+                .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/subjects").hasAnyRole("STUDENT", "PROFESSOR", "ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/subjects/*/courses").hasAnyRole("STUDENT", "PROFESSOR", "ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/courses/*/resources").hasAnyRole("STUDENT", "PROFESSOR", "ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/catalog/resources/count").hasAnyRole("STUDENT", "PROFESSOR", "ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/students/*/resources/*/complete").hasAnyRole("STUDENT", "ADMIN")
+                .requestMatchers(HttpMethod.POST, "/students/*/resources/*/complete").hasAnyRole("STUDENT", "ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/students/*/progress").hasAnyRole("STUDENT", "PROFESSOR", "ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/students/*/recommendations").hasAnyRole("STUDENT", "ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/students/*/courses/*/enroll").hasAnyRole("STUDENT", "ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/students/*/courses").hasAnyRole("STUDENT", "ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/professors/*/students").hasAnyRole("PROFESSOR", "ADMIN")
                 .anyRequest().authenticated()
             )
             .oauth2ResourceServer(oauth2 -> oauth2
@@ -49,11 +62,17 @@ public class SecurityConfig {
     private Collection<GrantedAuthority> extractRoles(Jwt jwt) {
         Map<String, Object> realmAccess = jwt.getClaim("realm_access");
         if (realmAccess == null || !realmAccess.containsKey("roles")) {
-            return List.of(new SimpleGrantedAuthority("ROLE_STUDENT"));
+            return List.of();
         }
         
-        Collection<String> roles = (Collection<String>) realmAccess.get("roles");
+        Object rolesClaim = realmAccess.get("roles");
+        if (!(rolesClaim instanceof Collection<?> roles)) {
+            return List.of();
+        }
+
         return roles.stream()
+                .filter(String.class::isInstance)
+                .map(String.class::cast)
                 .map(role -> new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()))
                 .collect(Collectors.toList());
     }

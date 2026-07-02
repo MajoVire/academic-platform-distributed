@@ -6,6 +6,8 @@ import {
 } from '../errors/proxy-errors.js'
 
 export const errorHandler: ErrorRequestHandler = (error, _request, response, _next) => {
+  void _next
+
   if (error instanceof GatewayValidationError) {
     response.status(400).json({
       status: 'BAD_REQUEST',

@@ -5,6 +5,8 @@ export type CorsOrigin = string | string[] | boolean
 export interface GatewayConfig {
   port: number
   academicServiceUrl: string
+  keycloakIssuerUri: string
+  keycloakJwkSetUri: string
   corsOrigin: CorsOrigin
   requestTimeoutMs: number
   nodeEnv: string
@@ -54,12 +56,24 @@ function parseUrl(value: string | undefined, fallback: string, name: string): st
 }
 
 export function loadGatewayConfig(): GatewayConfig {
+  const keycloakIssuerUri = parseUrl(
+    process.env.KEYCLOAK_ISSUER_URI,
+    'http://localhost:8180/realms/academic-platform',
+    'KEYCLOAK_ISSUER_URI',
+  )
+
   return {
     port: parsePositiveInteger(process.env.WEB_GATEWAY_PORT, 3000, 'WEB_GATEWAY_PORT'),
     academicServiceUrl: parseUrl(
       process.env.ACADEMIC_SERVICE_URL,
       'http://academic-service:8080',
       'ACADEMIC_SERVICE_URL',
+    ),
+    keycloakIssuerUri,
+    keycloakJwkSetUri: parseUrl(
+      process.env.KEYCLOAK_JWK_SET_URI,
+      `${keycloakIssuerUri}/protocol/openid-connect/certs`,
+      'KEYCLOAK_JWK_SET_URI',
     ),
     corsOrigin: parseCorsOrigin(process.env.GATEWAY_CORS_ORIGIN),
     requestTimeoutMs: parsePositiveInteger(process.env.REQUEST_TIMEOUT_MS, 5000, 'REQUEST_TIMEOUT_MS'),
