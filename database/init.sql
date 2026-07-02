@@ -10,12 +10,25 @@ CREATE TABLE subjects (
 CREATE TABLE courses (
     id SERIAL PRIMARY KEY,
     subject_id INTEGER NOT NULL REFERENCES subjects(id),
+    professor_id INTEGER,
     title VARCHAR(150) NOT NULL,
     description TEXT NOT NULL,
     UNIQUE(subject_id, title)
 );
 
 CREATE INDEX idx_courses_subject_id ON courses(subject_id);
+CREATE INDEX idx_courses_professor_id ON courses(professor_id);
+
+CREATE TABLE enrollments (
+    id SERIAL PRIMARY KEY,
+    student_id INTEGER NOT NULL,
+    course_id INTEGER NOT NULL REFERENCES courses(id),
+    enrolled_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(student_id, course_id)
+);
+
+CREATE INDEX idx_enrollments_student_id ON enrollments(student_id);
+CREATE INDEX idx_enrollments_course_id ON enrollments(course_id);
 
 CREATE TABLE resources (
     id SERIAL PRIMARY KEY,
@@ -64,43 +77,43 @@ CREATE INDEX idx_activity_log_completed_at ON activity_log(completed_at);
 INSERT INTO subjects (id, name, description) VALUES
 (1, 'Sistemas Distribuidos', 'Conceptos base de sistemas distribuidos y servicios'),
 (2, 'Ingenieria de Software', 'Practicas de analisis, diseno y calidad'),
-(3, 'BASE DE DATOS II: ADMINISTRACIÓN Y OPTIMIZACIÓN', 'Administración avanzada de bases de datos y optimización de consultas'),
-(4, 'GESTION DE PROYECTOS', 'Metodologías ágiles y tradicionales para la gestión de proyectos de TI'),
-(5, 'INTELIGENCIA ARTIFICIAL', 'Fundamentos de IA, machine learning y redes neuronales'),
-(6, 'SISTEMAS OPERATIVOS', 'Arquitectura, gestión de memoria y procesos de sistemas operativos'),
-(7, 'INGENIERIA DE REQUERIMIENTOS', 'Técnicas de elicitación, análisis y especificación de requerimientos'),
-(8, 'INGENIERÍA DE SOFTWARE EMPÍRICA', 'Estudio basado en datos y métricas aplicadas al desarrollo de software'),
-(9, 'REDES DE COMPUTADORES', 'Protocolos, arquitecturas y topologías de redes informáticas'),
-(10, 'SEGURIDAD INFORMÁTICA', 'Principios de criptografía, vulnerabilidades y protección de sistemas'),
-(11, 'VERIFICACION Y VALIDACION DE SOFTWARE', 'Pruebas de software, aseguramiento de la calidad y testing automatizado'),
-(12, 'DISEÑO Y ARQUITECTURA DE SOFTWARE', 'Patrones de diseño arquitectónico y modelado de sistemas complejos'),
-(13, 'INTERACCIÓN HUMANO-MÁQUINA', 'Diseño de interfaces, experiencia de usuario y usabilidad'),
-(14, 'PROGRAMACIÓN WEB', 'Desarrollo de aplicaciones web frontend y backend'),
-(15, 'TECNOLOGIAS PARA LA EDUCACION', 'Herramientas digitales y plataformas para el e-learning y educación virtual');
+(3, 'Base de Datos II: Administración y Optimización', 'Administración avanzada de bases de datos y optimización de consultas'),
+(4, 'Gestión de Proyectos', 'Metodologías ágiles y tradicionales para la gestión de proyectos de TI'),
+(5, 'Inteligencia Artificial', 'Fundamentos de IA, machine learning y redes neuronales'),
+(6, 'Sistemas Operativos', 'Arquitectura, gestión de memoria y procesos de sistemas operativos'),
+(7, 'Ingeniería de Requerimientos', 'Técnicas de elicitación, análisis y especificación de requerimientos'),
+(8, 'Ingeniería de Software Empírica', 'Estudio basado en datos y métricas aplicadas al desarrollo de software'),
+(9, 'Redes de Computadores', 'Protocolos, arquitecturas y topologías de redes informáticas'),
+(10, 'Seguridad Informática', 'Principios de criptografía, vulnerabilidades y protección de sistemas'),
+(11, 'Verificación y Validación de Software', 'Pruebas de software, aseguramiento de la calidad y testing automatizado'),
+(12, 'Diseño y Arquitectura de Software', 'Patrones de diseño arquitectónico y modelado de sistemas complejos'),
+(13, 'Interacción Humano-Máquina', 'Diseño de interfaces, experiencia de usuario y usabilidad'),
+(14, 'Programación Web', 'Desarrollo de aplicaciones web frontend y backend'),
+(15, 'Tecnologías para la Educación', 'Herramientas digitales y plataformas para el e-learning y educación virtual');
 
 SELECT setval('subjects_id_seq', (SELECT MAX(id) FROM subjects));
 
-INSERT INTO courses (id, subject_id, title, description) VALUES
-(1, 1, 'Introduccion a Sistemas Distribuidos', 'Fundamentos, componentes y arquitectura'),
-(2, 1, 'Mensajeria y Colas', 'Uso de colas, eventos y comunicacion asincronica'),
-(3, 2, 'Diseno de Software', 'Principios de diseno y patrones comunes'),
-(4, 3, 'Afinamiento de Consultas SQL', 'Técnicas avanzadas para mejorar el rendimiento de BD'),
-(5, 3, 'Respaldos y Alta Disponibilidad', 'Estrategias de backup y replicación de datos'),
-(6, 4, 'Metodología Scrum en la Práctica', 'Gestión de proyectos usando sprints y ceremonias'),
-(7, 5, 'Redes Neuronales desde Cero', 'Introducción matemática y práctica al deep learning'),
-(8, 5, 'Procesamiento de Lenguaje Natural', 'Análisis de texto y modelos de lenguaje NLP'),
-(9, 6, 'Gestión de Memoria y Paginación', 'Cómo el SO administra la memoria RAM'),
-(10, 7, 'Historias de Usuario y Casos de Uso', 'Técnicas para especificar requerimientos funcionales'),
-(11, 8, 'Métricas de Calidad de Software', 'Cómo medir el éxito y la calidad en el desarrollo'),
-(12, 9, 'Capa de Red y Enrutamiento IP', 'Estudio de los protocolos de red e IPs'),
-(13, 10, 'Ataques Web Comunes (OWASP)', 'Inyección SQL, XSS y protección de APIs'),
-(14, 11, 'Pruebas Unitarias y TDD', 'Desarrollo guiado por pruebas usando frameworks'),
-(15, 12, 'Arquitectura de Microservicios', 'Desacoplamiento y escalabilidad de servicios'),
-(16, 12, 'Patrones de Diseño Gang of Four', 'Creacionales, estructurales y de comportamiento'),
-(17, 13, 'Principios de UX/UI', 'Bases de la experiencia de usuario y diseño visual'),
-(18, 14, 'Desarrollo Frontend React Avanzado', 'Hooks, estado global y optimización en React'),
-(19, 14, 'Backend API REST con Spring Boot', 'Creación de servicios web y conexión a BD'),
-(20, 15, 'Gamificación en el Aula Virtual', 'Uso de juegos y recompensas para el aprendizaje');
+INSERT INTO courses (id, subject_id, professor_id, title, description) VALUES
+(1, 1, 100, 'Introduccion a Sistemas Distribuidos', 'Fundamentos, componentes y arquitectura'),
+(2, 1, 100, 'Mensajeria y Colas', 'Uso de colas, eventos y comunicacion asincronica'),
+(3, 2, 100, 'Diseno de Software', 'Principios de diseno y patrones comunes'),
+(4, 3, 100, 'Afinamiento de Consultas SQL', 'Técnicas avanzadas para mejorar el rendimiento de BD'),
+(5, 3, 100, 'Respaldos y Alta Disponibilidad', 'Estrategias de backup y replicación de datos'),
+(6, 4, 100, 'Metodología Scrum en la Práctica', 'Gestión de proyectos usando sprints y ceremonias'),
+(7, 5, 100, 'Redes Neuronales desde Cero', 'Introducción matemática y práctica al deep learning'),
+(8, 5, 100, 'Procesamiento de Lenguaje Natural', 'Análisis de texto y modelos de lenguaje NLP'),
+(9, 6, 100, 'Gestión de Memoria y Paginación', 'Cómo el SO administra la memoria RAM'),
+(10, 7, 100, 'Historias de Usuario y Casos de Uso', 'Técnicas para especificar requerimientos funcionales'),
+(11, 8, 100, 'Métricas de Calidad de Software', 'Cómo medir el éxito y la calidad en el desarrollo'),
+(12, 9, 100, 'Capa de Red y Enrutamiento IP', 'Estudio de los protocolos de red e IPs'),
+(13, 10, 100, 'Ataques Web Comunes (OWASP)', 'Inyección SQL, XSS y protección de APIs'),
+(14, 11, 100, 'Pruebas Unitarias y TDD', 'Desarrollo guiado por pruebas usando frameworks'),
+(15, 12, 100, 'Arquitectura de Microservicios', 'Desacoplamiento y escalabilidad de servicios'),
+(16, 12, 100, 'Patrones de Diseño Gang of Four', 'Creacionales, estructurales y de comportamiento'),
+(17, 13, 100, 'Principios de UX/UI', 'Bases de la experiencia de usuario y diseño visual'),
+(18, 14, 100, 'Desarrollo Frontend React Avanzado', 'Hooks, estado global y optimización en React'),
+(19, 14, 100, 'Backend API REST con Spring Boot', 'Creación de servicios web y conexión a BD'),
+(20, 15, 100, 'Gamificación en el Aula Virtual', 'Uso de juegos y recompensas para el aprendizaje');
 
 SELECT setval('courses_id_seq', (SELECT MAX(id) FROM courses));
 

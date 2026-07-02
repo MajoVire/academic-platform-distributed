@@ -8,8 +8,12 @@ import {
    IoBarChart, 
    IoSparklesOutline, 
    IoSparkles,
+   IoPeopleOutline,
+   IoPeople,
    IoLogOutOutline,
-   IoLogInOutline
+   IoLogInOutline,
+   IoCompassOutline,
+   IoCompass
 } from 'react-icons/io5'
 import ThemeToggle from './ThemeToggle'
 import logoPNG from '../../assets/logo.png'
@@ -21,6 +25,7 @@ interface NavItem {
   to: string // URL de destino de React Router (ej. "/progress")
   iconOutline: any // Icono con borde (modo inactivo)
   iconSolid: any // Icono relleno (modo activo)
+  roles?: string[] // Roles que pueden ver este item (vacío = público o cualquier autenticado)
 }
 
 // Lista ordenada de los elementos que irán en el menú de navegación de la app.
@@ -32,27 +37,66 @@ const navigationItems: NavItem[] = [
     iconSolid: IoHome 
   },
   { 
-    label: 'Materias', 
-    to: '/subjects', 
+    label: 'Explorar', 
+    to: '/explore', 
+    iconOutline: IoCompassOutline, 
+    iconSolid: IoCompass,
+    roles: ['STUDENT', 'PROFESSOR', 'ADMIN'],
+  },
+  { 
+    label: 'Cursos', 
+    to: '/my-courses', 
     iconOutline: IoBookOutline, 
-    iconSolid: IoBook 
+    iconSolid: IoBook,
+    roles: ['STUDENT', 'PROFESSOR', 'ADMIN'],
   },
   { 
     label: 'Progreso', 
     to: '/progress', 
     iconOutline: IoBarChartOutline, 
-    iconSolid: IoBarChart 
+    iconSolid: IoBarChart,
+    roles: ['STUDENT', 'ADMIN'],
   },
   { 
     label: 'Recomendaciones', 
     to: '/recommendations', 
     iconOutline: IoSparklesOutline, 
-    iconSolid: IoSparkles 
+    iconSolid: IoSparkles,
+    roles: ['STUDENT', 'ADMIN'],
+  },
+  { 
+    label: 'Gestión', 
+    to: '/admin/students', 
+    iconOutline: IoPeopleOutline, 
+    iconSolid: IoPeople,
+    roles: ['PROFESSOR', 'ADMIN'],
   },
 ]
 
+/**
+ * Devuelve la etiqueta legible del rol principal del usuario.
+ */
+function getRoleBadge(hasRole: (r: string) => boolean): string | null {
+  if (hasRole('ADMIN')) return 'Admin'
+  if (hasRole('PROFESSOR')) return 'Profesor'
+  if (hasRole('STUDENT')) return 'Estudiante'
+  return null
+}
+
 export function Navbar() {
-  const { isAuthenticated, login, logout, userName } = useAuth()
+  const { isAuthenticated, login, logout, userName, hasRole } = useAuth()
+
+  // Filtra los items de navegación según el rol del usuario
+  const visibleItems = navigationItems.filter((item) => {
+    // El item "Inicio" siempre se muestra
+    if (!item.roles) return true
+    // Si no está autenticado, solo mostrar items sin roles (Inicio)
+    if (!isAuthenticated) return false
+    // Si está autenticado, mostrar solo items donde tenga al menos un rol permitido
+    return item.roles.some((role) => hasRole(role))
+  })
+
+  const roleBadge = isAuthenticated ? getRoleBadge(hasRole) : null
 
   return (
     <>
@@ -75,9 +119,9 @@ export function Navbar() {
               </span>
             </NavLink>
 
-            {/* Menú de Navegación */}
+            {/* Menú de Navegación filtrado por rol */}
             <nav className="flex items-center gap-1.5">
-              {navigationItems.filter(item => isAuthenticated || item.to === '/').map((item) => {
+              {visibleItems.map((item) => {
                 const IconOutline = item.iconOutline
                 const IconSolid = item.iconSolid
                 return (
@@ -110,13 +154,21 @@ export function Navbar() {
             </nav>
           </div>
 
-          {/* Acciones de la derecha (Botón de cambiar Modo Claro / Oscuro) */}
+          {/* Acciones de la derecha */}
           <div className="flex items-center gap-4">
             {isAuthenticated ? (
-              <button onClick={() => logout()} className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-red-500 dark:text-slate-400 dark:hover:text-red-400 transition-colors cursor-pointer" title="Cerrar sesión">
-                <span className="hidden lg:inline max-w-[120px] truncate">{userName}</span>
-                <IoLogOutOutline className="w-5.5 h-5.5" />
-              </button>
+              <div className="flex items-center gap-3">
+                {/* Badge de rol */}
+                {roleBadge && (
+                  <span className="hidden lg:inline-flex items-center px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 text-[11px] font-bold uppercase tracking-wider border border-blue-200/60 dark:border-blue-800/40">
+                    {roleBadge}
+                  </span>
+                )}
+                <button onClick={() => logout()} className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-red-500 dark:text-slate-400 dark:hover:text-red-400 transition-colors cursor-pointer" title="Cerrar sesión">
+                  <span className="hidden lg:inline max-w-[120px] truncate">{userName}</span>
+                  <IoLogOutOutline className="w-5.5 h-5.5" />
+                </button>
+              </div>
             ) : (
               <button onClick={() => login()} className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition-colors cursor-pointer" title="Iniciar sesión">
                 <span className="hidden lg:inline">Ingresar</span>
@@ -131,11 +183,10 @@ export function Navbar() {
 
       {/* =========================================================================
           2. NAVBAR INFERIOR FIJO (Para celulares / pantallas sm e inferiores)
-          Le da un aspecto nativo de app móvil con botones grandes en la parte de abajo
           ========================================================================= */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 h-16 bg-white/90 dark:bg-slate-950/90 backdrop-blur-lg border-t border-slate-200/60 dark:border-slate-900/60 transition-colors duration-300 pb-safe">
-        <div className={`grid h-full max-w-md mx-auto items-center px-2 ${isAuthenticated ? 'grid-cols-4' : 'grid-cols-1'}`}>
-          {navigationItems.filter(item => isAuthenticated || item.to === '/').map((item) => {
+        <div className={`grid h-full max-w-md mx-auto items-center px-2`} style={{ gridTemplateColumns: `repeat(${visibleItems.length}, 1fr)` }}>
+          {visibleItems.map((item) => {
             const IconOutline = item.iconOutline
             const IconSolid = item.iconSolid
             return (
@@ -179,7 +230,6 @@ export function Navbar() {
 
       {/* =========================================================================
           3. CABECERA MÓVIL SUPERIOR SIMPLE (Para celulares / pantallas sm e inferiores)
-          Permite ver el Logo y tener el botón de Tema en la esquina superior mientras navegas en el móvil
           ========================================================================= */}
       <header className="md:hidden sticky top-0 z-40 w-full h-20 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-slate-200/60 dark:border-slate-900/60 transition-colors duration-300 px-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -194,9 +244,16 @@ export function Navbar() {
         </div>
         <div className="flex items-center gap-4">
           {isAuthenticated ? (
-            <button onClick={() => logout()} className="text-slate-500 hover:text-red-500 dark:text-slate-400 dark:hover:text-red-400 transition-colors cursor-pointer" title="Cerrar sesión">
-              <IoLogOutOutline className="w-6 h-6" />
-            </button>
+            <div className="flex items-center gap-2">
+              {roleBadge && (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 text-[10px] font-bold uppercase tracking-wider border border-blue-200/60 dark:border-blue-800/40">
+                  {roleBadge}
+                </span>
+              )}
+              <button onClick={() => logout()} className="text-slate-500 hover:text-red-500 dark:text-slate-400 dark:hover:text-red-400 transition-colors cursor-pointer" title="Cerrar sesión">
+                <IoLogOutOutline className="w-6 h-6" />
+              </button>
+            </div>
           ) : (
             <button onClick={() => login()} className="text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition-colors cursor-pointer" title="Iniciar sesión">
               <IoLogInOutline className="w-6 h-6" />
@@ -210,4 +267,5 @@ export function Navbar() {
 }
 
 export default Navbar
+
 

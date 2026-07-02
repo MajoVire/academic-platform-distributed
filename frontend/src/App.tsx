@@ -8,11 +8,11 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          {appRoutes.map(({ element, path, isPrivate }) => (
+          {appRoutes.map(({ element, path, isPrivate, roles }) => (
             <Route
               key={path}
               path={path}
-              element={isPrivate ? <PrivateRoute /> : element}
+              element={isPrivate ? <PrivateRoute allowedRoles={roles} /> : element}
             >
               {isPrivate && <Route index element={element} />}
             </Route>
@@ -24,4 +24,5 @@ function App() {
 }
 
 export default App
+
 

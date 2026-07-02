@@ -73,5 +73,19 @@ export function createGatewayController({ academicServiceClient }: GatewayContro
       const studentId = requirePositiveParam(request, 'studentId')
       return buildAcademicPath(`/students/${studentId}/recommendations`)
     }),
+    getCatalogResourceCount: proxyAcademicRoute(academicServiceClient, () => buildAcademicPath('/catalog/resources/count')),
+    enrollStudent: proxyAcademicRoute(academicServiceClient, (request) => {
+      const studentId = requirePositiveParam(request, 'studentId')
+      const courseId = requirePositiveParam(request, 'courseId')
+      return buildAcademicPath(`/students/${studentId}/courses/${courseId}/enroll`)
+    }),
+    getStudentEnrolledCourses: proxyAcademicRoute(academicServiceClient, (request) => {
+      const studentId = requirePositiveParam(request, 'studentId')
+      return buildAcademicPath(`/students/${studentId}/courses`)
+    }),
+    getProfessorStudents: proxyAcademicRoute(academicServiceClient, (request) => {
+      const professorId = requirePositiveParam(request, 'professorId')
+      return buildAcademicPath(`/professors/${professorId}/students`)
+    }),
   }
 }

@@ -49,5 +49,13 @@ export function setForwardedResponseHeaders(response: Response, headers: Record<
 
 export function sendUpstreamResponse<T>(response: Response, upstreamResponse: ForwardResponse<T>): void {
   setForwardedResponseHeaders(response, upstreamResponse.headers)
-  response.status(upstreamResponse.status).send(upstreamResponse.data)
+  const data = upstreamResponse.data
+  response.status(upstreamResponse.status)
+  if (typeof data === 'number') {
+    response.send(data.toString())
+  } else if (typeof data === 'object') {
+    response.json(data)
+  } else {
+    response.send(data)
+  }
 }

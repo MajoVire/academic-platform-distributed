@@ -4,6 +4,7 @@ import { getCourseResources, getStudentProgress, completeResource } from '../api
 import type { Resource } from '../types/academic'
 import ResourceCard from '../components/ui/ResourceCard'
 import { IoChevronBackOutline } from 'react-icons/io5'
+import { useAuth } from '../context/AuthProvider'
 
 // =========================================================================
 // PÁGINA DE RECURSOS DEL CURSO
@@ -40,6 +41,10 @@ const IsometricResourcesIllustration = () => (
 export function ResourcesPage() {
   // Extraemos el ID del curso actual de la URL
   const { courseId } = useParams<{ courseId?: string }>()
+  const { numericUserId, hasRole } = useAuth()
+
+  // Solo STUDENT y ADMIN pueden completar recursos
+  const canComplete = hasRole('STUDENT') || hasRole('ADMIN')
 
   // Estados locales para los recursos, los IDs completados, estados de carga y peticiones de red pendientes
   const [resources, setResources] = useState<Resource[]>([])
@@ -49,11 +54,6 @@ export function ResourcesPage() {
   const [error, setError] = useState<string | null>(null)
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
 
-  // TODO: El backend requiere un studentId Integer. 
-  // En una implementación completa, se debe mapear el UUID de Keycloak con el ID interno de PostgreSQL.
-  // Por ahora mantenemos el ID simulado 1 para la lógica de progreso.
-  const studentId = 1 
-
   // Función para descargar los recursos de la materia y el progreso del estudiante actual
   const fetchResourcesAndProgress = async () => {
     try {
@@ -61,7 +61,7 @@ export function ResourcesPage() {
       setError(null)
 
       // 1. Obtener la lista de recursos que este estudiante ya completó de la base de datos
-      const progressData = await getStudentProgress(studentId)
+      const progressData = await getStudentProgress(numericUserId)
       if (progressData && progressData.completedResourceIds) {
         setCompletedIds(progressData.completedResourceIds)
       } else {
@@ -111,7 +111,7 @@ export function ResourcesPage() {
       setSuccessMsg(null)
 
       // Ejecutar llamada al backend
-      await completeResource(studentId, resourceId)
+      await completeResource(numericUserId, resourceId)
 
       // Actualizar estado local inmediato para pintar la tarjeta de verde de forma instantánea
       setCompletedIds((prev) => [...prev, resourceId])
@@ -182,7 +182,7 @@ export function ResourcesPage() {
               description={resource.type === 'video' ? 'Video explicativo con guía práctica paso a paso.' : 'Material de lectura teórica y ejercicios prácticos de afianzamiento.'}
               type={resource.type || 'video'}
               isCompleted={completedIds.includes(resource.id)}
-              onCompleteToggle={() => handleMarkCompleted(resource.id, resource.title)}
+              onCompleteToggle={canComplete ? () => handleMarkCompleted(resource.id, resource.title) : undefined}
               isPending={pendingId === resource.id}
             />
           ))

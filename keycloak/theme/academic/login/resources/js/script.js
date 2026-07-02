@@ -1,15 +1,25 @@
 document.addEventListener("DOMContentLoaded", function() {
-    // Hide standard title and generic helper texts
+    // Do not hide the page title, just restyle it if needed
     const title = document.getElementById('kc-page-title');
-    if (title) title.style.display = 'none';
+    if (title) {
+        title.style.fontSize = '1.5rem';
+        title.style.fontWeight = '700';
+        title.style.color = '#111827';
+        title.style.marginBottom = '1.5rem';
+        title.style.textAlign = 'center';
+    }
 
-    // Hide required fields text
-    const helperText = document.querySelector('.pf-v5-c-login__main-header-desc');
-    if (helperText) helperText.style.display = 'none';
+    // Do not hide main-header-desc, it might contain important instructions or alerts
 
-    // Hide locale picker
-    const localePicker = document.querySelector('.pf-v5-c-login__main-header-utilities');
-    if (localePicker) localePicker.style.display = 'none';
+    // Hide locale picker safely without hiding the utilities container (which holds global alerts)
+    const utilitiesContainer = document.querySelector('.pf-v5-c-login__main-header-utilities');
+    if (utilitiesContainer) {
+        Array.from(utilitiesContainer.children).forEach(child => {
+            if (!child.classList.contains('pf-v5-c-alert')) {
+                child.style.display = 'none';
+            }
+        });
+    }
 
     // Hide "Usuario" field in registration and sync with email
     const registerForm = document.getElementById('kc-register-form');
@@ -83,13 +93,13 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    // Identify if it's Login or Registration and set the title
-    const headerWrapper = document.getElementById('kc-header-wrapper');
-    if (headerWrapper) {
+    // Identify if it's Login or Registration and set the title text safely
+    if (title) {
         if (document.getElementById('kc-register-form')) {
-            headerWrapper.innerHTML = '<h2>Registro</h2>';
+            title.innerText = 'Registro';
         } else {
-            headerWrapper.innerHTML = '<h2>Iniciar sesión</h2>';
+            title.innerText = 'Iniciar sesión';
         }
     }
+    // We intentionally DO NOT overwrite kc-header-wrapper because Keycloak might inject alerts there.
 });

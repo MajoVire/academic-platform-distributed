@@ -17,6 +17,10 @@ export function createGatewayRouter(dependencies: GatewayRoutesDependencies): Ro
   router.post('/students/:studentId/resources/:resourceId/complete', controller.completeResource)
   router.get('/students/:studentId/progress', controller.getStudentProgress)
   router.get('/students/:studentId/recommendations', controller.getStudentRecommendations)
+  router.get('/catalog/resources/count', controller.getCatalogResourceCount)
+  router.post('/students/:studentId/courses/:courseId/enroll', controller.enrollStudent)
+  router.get('/students/:studentId/courses', controller.getStudentEnrolledCourses)
+  router.get('/professors/:professorId/students', controller.getProfessorStudents)
 
   return router
 }
