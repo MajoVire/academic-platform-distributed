@@ -18,6 +18,22 @@ function createTestApp(academicServiceClient: AcademicServiceClient) {
 }
 
 describe('web-gateway-service', () => {
+  it('exposes a local health endpoint for Kubernetes probes', async () => {
+    const academicServiceClient: AcademicServiceClient = {
+      forward: vi.fn(),
+    }
+
+    const app = createTestApp(academicServiceClient)
+
+    const response = await request(app).get('/health').expect(200)
+
+    expect(response.body).toEqual({
+      status: 'UP',
+      service: 'web-gateway-service',
+    })
+    expect(academicServiceClient.forward).not.toHaveBeenCalled()
+  })
+
   it('forwards the health endpoint through academic-service', async () => {
     const academicServiceClient: AcademicServiceClient = {
       forward: vi.fn().mockResolvedValue({

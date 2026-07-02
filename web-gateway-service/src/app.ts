@@ -37,6 +37,13 @@ export function createApp(dependencies: CreateAppDependencies = {}) {
   app.use(express.urlencoded({ extended: false }))
   app.use(morgan(config.nodeEnv === 'production' ? 'combined' : 'dev'))
 
+  app.get('/health', (_request, response) => {
+    response.status(200).json({
+      status: 'UP',
+      service: 'web-gateway-service',
+    })
+  })
+
   app.use('/api', createGatewayRouter({ academicServiceClient }))
   app.use(notFoundHandler)
   app.use(errorHandler)

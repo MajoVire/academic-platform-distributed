@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq
+  namespace: academic-platform
+  labels:
+    app.kubernetes.io/name: rabbitmq
+    app.kubernetes.io/part-of: academic-platform
+    app.kubernetes.io/component: broker
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: rabbitmq
+    app.kubernetes.io/part-of: academic-platform
+    app.kubernetes.io/component: broker
+  ports:
+    - name: amqp
+      port: 5672
+      targetPort: 5672
+      protocol: TCP
+    - name: management
+      port: 15672
+      targetPort: 15672
+      protocol: TCP

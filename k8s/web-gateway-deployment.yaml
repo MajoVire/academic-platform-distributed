@@ -1,0 +1,123 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-gateway-service
+  namespace: academic-platform
+  labels:
+    app.kubernetes.io/name: web-gateway-service
+    app.kubernetes.io/part-of: academic-platform
+    app.kubernetes.io/component: gateway
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: web-gateway-service
+      app.kubernetes.io/part-of: academic-platform
+      app.kubernetes.io/component: gateway
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: web-gateway-service
+        app.kubernetes.io/part-of: academic-platform
+        app.kubernetes.io/component: gateway
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: web-gateway-service
+          image: academic-platform/web-gateway-service:1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          env:
+            - name: WEB_GATEWAY_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: academic-platform-config
+                  key: WEB_GATEWAY_PORT
+            - name: ACADEMIC_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: academic-platform-config
+                  key: ACADEMIC_SERVICE_URL
+            - name: GATEWAY_CORS_ORIGIN
+              valueFrom:
+                configMapKeyRef:
+                  name: academic-platform-config
+                  key: GATEWAY_CORS_ORIGIN
+            - name: REQUEST_TIMEOUT_MS
+              valueFrom:
+                configMapKeyRef:
+                  name: academic-platform-config
+                  key: REQUEST_TIMEOUT_MS
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: academic-platform-config
+                  key: NODE_ENV
+            - name: RABBITMQ_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: academic-platform-config
+                  key: RABBITMQ_HOST
+            - name: RABBITMQ_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: academic-platform-config
+                  key: RABBITMQ_PORT
+            - name: RABBITMQ_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: academic-platform-secrets
+                  key: RABBITMQ_USERNAME
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: academic-platform-secrets
+                  key: RABBITMQ_PASSWORD
+            - name: ACADEMIC_NOTIFICATIONS_EXCHANGE
+              valueFrom:
+                configMapKeyRef:
+                  name: academic-platform-config
+                  key: ACADEMIC_NOTIFICATIONS_EXCHANGE
+            - name: ACADEMIC_RECOMMENDATION_GENERATED_ROUTING_KEY
+              valueFrom:
+                configMapKeyRef:
+                  name: academic-platform-config
+                  key: ACADEMIC_RECOMMENDATION_GENERATED_ROUTING_KEY
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+              scheme: HTTP
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 24
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "128Mi"
+            limits:
+              cpu: "300m"
+              memory: "256Mi"

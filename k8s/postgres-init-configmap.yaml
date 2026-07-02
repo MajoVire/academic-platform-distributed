@@ -1,0 +1,86 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init-sql
+  namespace: academic-platform
+  labels:
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/part-of: academic-platform
+    app.kubernetes.io/component: database-init
+data:
+  init.sql: |
+    CREATE DATABASE keycloak;
+
+    CREATE TABLE subjects (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        description TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE courses (
+        id SERIAL PRIMARY KEY,
+        subject_id INTEGER REFERENCES subjects(id) ON DELETE CASCADE,
+        name VARCHAR(255) NOT NULL,
+        description TEXT,
+        level VARCHAR(50),
+        duration_hours INTEGER,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE resources (
+        id SERIAL PRIMARY KEY,
+        course_id INTEGER REFERENCES courses(id) ON DELETE CASCADE,
+        title VARCHAR(255) NOT NULL,
+        type VARCHAR(50) NOT NULL,
+        url TEXT,
+        description TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE student_progress (
+        id SERIAL PRIMARY KEY,
+        student_id INTEGER NOT NULL,
+        resource_id INTEGER REFERENCES resources(id) ON DELETE CASCADE,
+        completed BOOLEAN DEFAULT FALSE,
+        completed_at TIMESTAMP,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(student_id, resource_id)
+    );
+
+    CREATE TABLE activity_log (
+        id SERIAL PRIMARY KEY,
+        student_id INTEGER NOT NULL,
+        action_type VARCHAR(100) NOT NULL,
+        entity_type VARCHAR(100) NOT NULL,
+        entity_id INTEGER NOT NULL,
+        details TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    INSERT INTO subjects (name, description) VALUES
+    ('Matemática Discreta', 'Fundamentos de lógica, conjuntos y estructuras discretas.'),
+    ('Bases de Datos', 'Diseño y administración de bases de datos relacionales.'),
+    ('Redes de Computadoras', 'Conceptos fundamentales de comunicación de datos y redes.');
+
+    INSERT INTO courses (subject_id, name, description, level, duration_hours) VALUES
+    (1, 'Lógica Proposicional', 'Introducción a la lógica formal y tablas de verdad.', 'Básico', 20),
+    (1, 'Teoría de Grafos', 'Estudio de grafos, recorridos y aplicaciones.', 'Intermedio', 25),
+    (2, 'SQL Avanzado', 'Consultas complejas, optimización e índices.', 'Intermedio', 30),
+    (2, 'Modelado Relacional', 'Normalización y diseño de esquemas relacionales.', 'Básico', 18),
+    (3, 'Fundamentos de TCP/IP', 'Capa de red, transporte y direccionamiento.', 'Básico', 22),
+    (3, 'Enrutamiento y Conmutación', 'Protocolos de enrutamiento y switching.', 'Intermedio', 28);
+
+    INSERT INTO resources (course_id, title, type, url, description) VALUES
+    (1, 'Introducción a la Lógica', 'video', 'https://example.com/logica-intro', 'Video introductorio sobre lógica proposicional.'),
+    (1, 'Ejercicios de Tablas de Verdad', 'article', 'https://example.com/tablas-verdad', 'Guía práctica de tablas de verdad.'),
+    (2, 'Recorridos en Grafos', 'video', 'https://example.com/grafos-recorridos', 'Explicación de DFS y BFS.'),
+    (2, 'Aplicaciones de Grafos', 'article', 'https://example.com/grafos-aplicaciones', 'Casos de uso de teoría de grafos.'),
+    (3, 'Consultas JOIN', 'video', 'https://example.com/sql-join', 'Uso de JOINs en SQL.'),
+    (3, 'Optimización de Consultas', 'article', 'https://example.com/sql-optimizacion', 'Técnicas para optimizar consultas.'),
+    (4, 'Normalización de Bases de Datos', 'video', 'https://example.com/normalizacion', 'Formas normales y diseño relacional.'),
+    (4, 'Diseño de Esquemas', 'article', 'https://example.com/esquemas', 'Buenas prácticas de modelado relacional.'),
+    (5, 'Modelo OSI vs TCP/IP', 'video', 'https://example.com/osi-tcpip', 'Comparación de modelos de red.'),
+    (5, 'Direcciones IP y Subredes', 'article', 'https://example.com/ip-subredes', 'Conceptos de direccionamiento IP.'),
+    (6, 'Protocolos de Enrutamiento', 'video', 'https://example.com/enrutamiento', 'Introducción a protocolos de enrutamiento.'),
+    (6, 'Conceptos de Switching', 'article', 'https://example.com/switching', 'Fundamentos de conmutación de redes.');

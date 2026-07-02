@@ -1,0 +1,113 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: recommendation-worker
+  namespace: academic-platform
+  labels:
+    app.kubernetes.io/name: recommendation-worker
+    app.kubernetes.io/part-of: academic-platform
+    app.kubernetes.io/component: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: recommendation-worker
+      app.kubernetes.io/part-of: academic-platform
+      app.kubernetes.io/component: backend
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: recommendation-worker
+        app.kubernetes.io/part-of: academic-platform
+        app.kubernetes.io/component: backend
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: recommendation-worker
+          image: academic-platform/recommendation-worker:1.0.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: RABBITMQ_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: academic-platform-config
+                  key: RABBITMQ_HOST
+            - name: RABBITMQ_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: academic-platform-config
+                  key: RABBITMQ_PORT
+            - name: RABBITMQ_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: academic-platform-secrets
+                  key: RABBITMQ_USERNAME
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: academic-platform-secrets
+                  key: RABBITMQ_PASSWORD
+            - name: ACADEMIC_EVENTS_EXCHANGE
+              valueFrom:
+                configMapKeyRef:
+                  name: academic-platform-config
+                  key: ACADEMIC_EVENTS_EXCHANGE
+            - name: ACADEMIC_EVENTS_QUEUE
+              valueFrom:
+                configMapKeyRef:
+                  name: academic-platform-config
+                  key: ACADEMIC_EVENTS_QUEUE
+            - name: ACADEMIC_RESOURCE_COMPLETED_ROUTING_KEY
+              valueFrom:
+                configMapKeyRef:
+                  name: academic-platform-config
+                  key: ACADEMIC_RESOURCE_COMPLETED_ROUTING_KEY
+            - name: ACADEMIC_NOTIFICATIONS_EXCHANGE
+              valueFrom:
+                configMapKeyRef:
+                  name: academic-platform-config
+                  key: ACADEMIC_NOTIFICATIONS_EXCHANGE
+            - name: ACADEMIC_RECOMMENDATION_GENERATED_ROUTING_KEY
+              valueFrom:
+                configMapKeyRef:
+                  name: academic-platform-config
+                  key: ACADEMIC_RECOMMENDATION_GENERATED_ROUTING_KEY
+            - name: ACADEMIC_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: academic-platform-config
+                  key: ACADEMIC_SERVICE_URL
+            - name: RABBITMQ_CONNECTION_ATTEMPTS
+              valueFrom:
+                configMapKeyRef:
+                  name: academic-platform-config
+                  key: RABBITMQ_CONNECTION_ATTEMPTS
+            - name: RABBITMQ_CONNECTION_RETRY_DELAY_SECONDS
+              valueFrom:
+                configMapKeyRef:
+                  name: academic-platform-config
+                  key: RABBITMQ_CONNECTION_RETRY_DELAY_SECONDS
+            - name: RECOMMENDATION_WORKER_REQUEUE_ON_FAILURE
+              valueFrom:
+                configMapKeyRef:
+                  name: academic-platform-config
+                  key: RECOMMENDATION_WORKER_REQUEUE_ON_FAILURE
+            - name: RECOMMENDATION_WORKER_ACADEMIC_SERVICE_TIMEOUT_SECONDS
+              valueFrom:
+                configMapKeyRef:
+                  name: academic-platform-config
+                  key: RECOMMENDATION_WORKER_ACADEMIC_SERVICE_TIMEOUT_SECONDS
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - sh
+                  - -c
+                  - sleep 2

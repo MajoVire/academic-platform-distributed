@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-gateway-service
+  namespace: academic-platform
+  labels:
+    app.kubernetes.io/name: web-gateway-service
+    app.kubernetes.io/part-of: academic-platform
+    app.kubernetes.io/component: gateway
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: web-gateway-service
+    app.kubernetes.io/part-of: academic-platform
+    app.kubernetes.io/component: gateway
+  ports:
+    - name: http
+      port: 3000
+      targetPort: 3000
+      protocol: TCP

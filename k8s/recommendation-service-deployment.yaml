@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: recommendation-service
+  namespace: academic-platform
+  labels:
+    app.kubernetes.io/name: recommendation-service
+    app.kubernetes.io/part-of: academic-platform
+    app.kubernetes.io/component: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: recommendation-service
+      app.kubernetes.io/part-of: academic-platform
+      app.kubernetes.io/component: backend
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: recommendation-service
+        app.kubernetes.io/part-of: academic-platform
+        app.kubernetes.io/component: backend
+    spec:
+      terminationGracePeriodSeconds: 20
+      containers:
+        - name: recommendation-service
+          image: academic-platform/recommendation-service:1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          env:
+            - name: PORT
+              value: "8000"
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+              scheme: HTTP
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 12
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "128Mi"
+            limits:
+              cpu: "300m"
+              memory: "256Mi"

@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: recommendation-service
+  namespace: academic-platform
+  labels:
+    app.kubernetes.io/name: recommendation-service
+    app.kubernetes.io/part-of: academic-platform
+    app.kubernetes.io/component: backend
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: recommendation-service
+    app.kubernetes.io/part-of: academic-platform
+    app.kubernetes.io/component: backend
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+      protocol: TCP

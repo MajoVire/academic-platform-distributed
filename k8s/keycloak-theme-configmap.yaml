@@ -1,0 +1,305 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-theme-config
+  namespace: academic-platform
+  labels:
+    app.kubernetes.io/name: keycloak
+    app.kubernetes.io/part-of: academic-platform
+    app.kubernetes.io/component: auth-theme
+data:
+  theme.properties: |
+    parent=keycloak.v2
+    import=common/keycloak
+    styles=css/custom-styles.css
+    scripts=js/script.js
+  custom-styles.css: |
+    /* Custom Keycloak Theme - Professional Tailwind UI Style */
+
+    /* Reset and Globals */
+    body {
+        margin: 0 !important;
+        padding: 0 !important;
+        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif !important;
+        display: flex !important;
+        height: 100vh !important;
+        background-color: #0f172a !important; /* fallback */
+        background-image: none !important;
+        background-size: cover !important;
+        background-position: center !important;
+        background-repeat: no-repeat !important;
+        overflow: hidden !important;
+        align-items: center !important;
+        justify-content: center !important;
+        -webkit-font-smoothing: antialiased;
+        /* Subtle background animation */
+        animation: breathingBg 30s infinite alternate ease-in-out !important;
+    }
+
+    @keyframes breathingBg {
+        0% { background-size: 100%; }
+        100% { background-size: 110%; }
+    }
+
+    /* Base layout container from Keycloak */
+    .pf-v5-c-login, .login-pf-page {
+        display: flex !important;
+        width: 100% !important;
+        height: 100vh !important;
+        background: none !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    /* Centered Form Card - Tailwind UI Style */
+    .pf-v5-c-login__container {
+        width: 100% !important;
+        max-width: 400px !important; /* w-full max-w-sm */
+        display: flex !important;
+        flex-direction: column !important;
+        background-color: #ffffff !important;
+        padding: 2rem 2.5rem !important; /* px-10 py-8 */
+        border-radius: 0.75rem !important; /* rounded-xl */
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important; /* shadow-lg */
+        border: none !important;
+        z-index: 10 !important;
+        align-items: center !important;
+        /* Prevent scroll by letting it size to content */
+        max-height: 95vh !important;
+        overflow-y: hidden !important;
+    }
+
+    @media (max-width: 600px) {
+        .pf-v5-c-login__container {
+            max-width: 100% !important;
+            border-radius: 0 !important;
+            padding: 2rem 1.5rem !important;
+            box-shadow: none !important;
+            border: none !important;
+        }
+    }
+
+    /* Hide language picker and helper text */
+    #kc-locale, .kc-locale-wrapper, .pf-v5-c-form__helper-text {
+        display: none !important;
+    }
+
+    /* Dynamic Spacer for content */
+    .pf-v5-c-login__header, header {
+        width: 100% !important;
+    }
+
+    .pf-v5-c-login__footer, footer, .login-pf-page .card-pf + div {
+        margin-bottom: auto !important;
+        width: 100% !important;
+    }
+
+    /* Form Card Container (Inner) */
+    .pf-v5-c-login__main, .pf-c-login__main, .login-pf-page .card-pf {
+        background-color: transparent !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+        width: 100% !important;
+        flex-shrink: 0 !important;
+        margin-top: 1.5rem !important;
+    }
+
+    /* Ensure single column layout */
+    #kc-form-login, #kc-register-form, #kc-update-profile-form {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 0.875rem !important; /* space-y-3.5 */
+        width: 100% !important;
+    }
+
+    /* Form Groups */
+    .pf-v5-c-form__group {
+        margin-bottom: 0 !important;
+        width: 100% !important;
+    }
+
+    /* Primary Button (Sign In) */
+    input[type="submit"], button[type="submit"], .pf-v5-c-button.pf-m-primary {
+        background-color: #2563eb !important; /* bg-blue-600 */
+        color: white !important;
+        border-radius: 0.375rem !important; /* rounded-md */
+        font-weight: 500 !important; /* font-medium */
+        border: none !important;
+        padding: 0.5rem 1rem !important; /* px-4 py-2 */
+        font-size: 0.875rem !important; /* text-sm */
+        line-height: 1.25rem !important;
+        transition: background-color 0.15s ease-in-out !important;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important; /* shadow-sm */
+        cursor: pointer !important;
+        width: 100% !important;
+        min-height: 36px !important;
+        margin-top: 0.5rem !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+    }
+
+    input[type="submit"]:hover, button[type="submit"]:hover, .pf-v5-c-button.pf-m-primary:hover {
+        background-color: #1d4ed8 !important; /* hover:bg-blue-700 */
+    }
+
+    /* Header Text (Replaced by JS) */
+    #kc-header-wrapper {
+        text-align: center !important;
+        margin-bottom: 0 !important;
+    }
+
+    #kc-header-wrapper h2 {
+        font-size: 1.5rem !important; /* text-2xl */
+        line-height: 2rem !important;
+        font-weight: 700 !important; /* font-bold */
+        color: #111827 !important; /* text-gray-900 */
+        margin: 0 !important;
+        font-family: inherit !important;
+        letter-spacing: -0.025em !important; /* tracking-tight */
+    }
+
+    /* Hide extra Keycloak branding elements if they appear */
+    .pf-v5-c-brand, .pf-c-brand {
+        display: none !important;
+    }
+
+    /* Login Subtitle / Info text */
+    #kc-page-title {
+        display: none !important;
+    }
+
+    /* Links */
+    a {
+        color: #2563eb !important; /* text-blue-600 */
+        font-weight: 500 !important; /* font-medium */
+        font-size: 0.875rem !important; /* text-sm */
+        text-decoration: none !important;
+    }
+    a:hover {
+        color: #1e40af !important; /* hover:text-blue-800 */
+    }
+
+    /* Bottom links / Already have an account container */
+    #kc-info-wrapper, #kc-registration {
+        text-align: center !important;
+        width: 100% !important;
+        margin-top: 1.5rem !important; /* mt-6 */
+        font-size: 0.875rem !important; /* text-sm */
+        color: #6b7280 !important; /* text-gray-500 */
+    }
+
+    /* Checkbox alignment */
+    .pf-v5-c-check {
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.5rem !important;
+        font-size: 0.875rem !important;
+        color: #4b5563 !important; /* text-gray-700 */
+    }
+    .pf-v5-c-check__input {
+        margin-top: 0 !important;
+        height: 1rem !important; /* h-4 */
+        width: 1rem !important; /* w-4 */
+        border-radius: 0.25rem !important; /* rounded */
+        border-color: #d1d5db !important; /* border-gray-300 */
+        color: #2563eb !important; /* text-blue-600 */
+    }
+  script.js: |
+    document.addEventListener("DOMContentLoaded", function() {
+        // Hide standard title and generic helper texts
+        const title = document.getElementById('kc-page-title');
+        if (title) title.style.display = 'none';
+
+        // Hide required fields text
+        const helperText = document.querySelector('.pf-v5-c-login__main-header-desc');
+        if (helperText) helperText.style.display = 'none';
+
+        // Hide locale picker
+        const localePicker = document.querySelector('.pf-v5-c-login__main-header-utilities');
+        if (localePicker) localePicker.style.display = 'none';
+
+        // Hide "Usuario" field in registration and sync with email
+        const registerForm = document.getElementById('kc-register-form');
+        if (registerForm) {
+            const usernameInput = registerForm.querySelector('input[name="username"]');
+            const emailInput = registerForm.querySelector('input[name="email"]');
+
+            if (usernameInput && emailInput) {
+                const group = usernameInput.closest('.pf-v5-c-form__group');
+                if (group) group.style.display = 'none'; // Hide the whole group
+
+                emailInput.addEventListener('input', function() {
+                    usernameInput.value = emailInput.value;
+                });
+            }
+
+            // Reorder registration fields safely
+            const order = ['firstName', 'lastName', 'email', 'password', 'password-confirm'];
+            order.forEach(name => {
+                const input = registerForm.querySelector(`input[name="${name}"]`);
+                if (input) {
+                    const group = input.closest('.pf-v5-c-form__group');
+                    if (group) registerForm.appendChild(group);
+                }
+            });
+
+            // Ensure submit button is at the end
+            const btnGroup = document.getElementById('kc-form-buttons');
+            if (btnGroup) {
+                registerForm.appendChild(btnGroup);
+            }
+        }
+
+        // Convert all labels into placeholders (using Spanish texts)
+        const inputs = document.querySelectorAll('.pf-v5-c-form-control, input[type="text"], input[type="password"], input[type="email"]');
+        inputs.forEach(input => {
+            const id = input.getAttribute('id');
+            if (id) {
+                const label = document.querySelector(`label[for="${id}"]`);
+                if (label) {
+                    let labelText = label.innerText.replace('*', '').trim();
+
+                    // Enforce proper Spanish placeholders
+                    if (labelText.toLowerCase().includes('nombre') && !labelText.toLowerCase().includes('usuario')) {
+                        labelText = 'Nombres';
+                    } else if (labelText.toLowerCase().includes('apellido')) {
+                        labelText = 'Apellidos';
+                    } else if (labelText.toLowerCase().includes('correo')) {
+                        labelText = 'Correo electrónico';
+                    } else if (labelText.toLowerCase().includes('confirmar')) {
+                        labelText = 'Confirmar contraseña';
+                    } else if (labelText.toLowerCase().includes('contraseña')) {
+                        labelText = 'Contraseña';
+                    } else if (labelText.toLowerCase().includes('usuario')) {
+                        labelText = 'Usuario o correo';
+                    }
+
+                    input.setAttribute('placeholder', labelText);
+                    label.style.display = 'none'; // Hide the label visually
+                }
+            }
+        });
+
+        // Style the registration link at the bottom (for login page)
+        const registerNode = document.getElementById('kc-registration');
+        if (registerNode) {
+            const link = registerNode.querySelector('a');
+            if (link) {
+                // Put the link on a new line using <br>
+                registerNode.innerHTML = `<span>¿No tienes cuenta?<br><a href="${link.href}" style="display:inline-block; margin-top:0.5rem; font-weight:600;">Regístrate ahora</a></span>`;
+            }
+        }
+
+        // Identify if it's Login or Registration and set the title
+        const headerWrapper = document.getElementById('kc-header-wrapper');
+        if (headerWrapper) {
+            if (document.getElementById('kc-register-form')) {
+                headerWrapper.innerHTML = '<h2>Registro</h2>';
+            } else {
+                headerWrapper.innerHTML = '<h2>Iniciar sesión</h2>';
+            }
+        }
+    });
