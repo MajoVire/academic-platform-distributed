@@ -24,7 +24,7 @@ spec:
       terminationGracePeriodSeconds: 30
       containers:
         - name: frontend
-          image: academic-platform/frontend:1.0.0
+          image: academic-platform/frontend:1.0.1
           imagePullPolicy: IfNotPresent
           ports:
             - name: http

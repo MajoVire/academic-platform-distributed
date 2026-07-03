@@ -1,10 +1,10 @@
-import { getDatabase } from './database'
+import { dbPromise } from './indexeddb'
 import type { Subject } from '../types/academic'
 
 const STORE = 'subjects'
 
 export async function saveSubjects(subjects: Subject[]) {
-  const db = await getDatabase()
+  const db = await dbPromise
 
   const tx = db.transaction(STORE, 'readwrite')
 
@@ -18,13 +18,13 @@ export async function saveSubjects(subjects: Subject[]) {
 }
 
 export async function getSubjectsOffline(): Promise<Subject[]> {
-  const db = await getDatabase()
+  const db = await dbPromise
 
   return db.getAll(STORE)
 }
 
 export async function clearSubjects() {
-  const db = await getDatabase()
+  const db = await dbPromise
 
   const tx = db.transaction(STORE, 'readwrite')
 

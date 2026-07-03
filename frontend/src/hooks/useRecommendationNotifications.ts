@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { connectSocket } from '../realtime/socketClient'
 import type { RecommendationGeneratedEvent } from '../types/academic'
+import { appendStudentRecommendation } from '../offline/local-data-cache'
 
 const REGISTER_STUDENT_EVENT = 'register-student'
 const RECOMMENDATION_GENERATED_EVENT = 'recommendation-generated'
@@ -65,6 +66,15 @@ export function useRecommendationNotifications(studentId: number) {
       console.log(
         `[WebSocket] Recomendación: ${data.recommendation.title}`,
       )
+
+      void appendStudentRecommendation(normalizedStudentId, {
+        title: data.recommendation.title,
+        reason: data.recommendation.reason,
+        studentId: data.studentId,
+        resourceId: data.resourceId,
+      }).catch((error) => {
+        console.error('[WebSocket] No se pudo persistir la recomendación localmente', error)
+      })
 
       setNotification(data)
     }

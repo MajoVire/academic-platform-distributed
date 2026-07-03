@@ -26,7 +26,7 @@ spec:
       terminationGracePeriodSeconds: 30
       containers:
         - name: web-gateway-service
-          image: academic-platform/web-gateway-service:1.0.1
+          image: academic-platform/web-gateway-service:1.0.2
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
@@ -58,6 +58,16 @@ spec:
                 configMapKeyRef:
                   name: academic-platform-config
                   key: NODE_ENV
+            - name: KEYCLOAK_ISSUER_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: academic-platform-config
+                  key: KEYCLOAK_ISSUER_URI
+            - name: KEYCLOAK_JWK_SET_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: academic-platform-config
+                  key: KEYCLOAK_JWK_SET_URI
             - name: RABBITMQ_HOST
               valueFrom:
                 configMapKeyRef:

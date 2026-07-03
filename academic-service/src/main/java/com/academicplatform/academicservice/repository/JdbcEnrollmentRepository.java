@@ -33,17 +33,23 @@ public class JdbcEnrollmentRepository implements EnrollmentRepository {
     @Override
     public List<Long> getStudentsByProfessor(Long professorId) {
         String sql = """
-            SELECT DISTINCT e.student_id 
+            SELECT DISTINCT e.student_id
             FROM enrollments e
             JOIN courses c ON e.course_id = c.id
             WHERE c.professor_id = ?
+            ORDER BY e.student_id
         """;
-        return jdbcTemplate.queryForList(sql, Long.class, professorId);
+        return jdbcTemplate.query(sql, (rs, rowNum) -> rs.getLong("student_id"), professorId);
     }
 
     @Override
     public List<Long> getEnrolledCoursesByStudent(Long studentId) {
-        String sql = "SELECT course_id FROM enrollments WHERE student_id = ?";
-        return jdbcTemplate.queryForList(sql, Long.class, studentId);
+        String sql = """
+            SELECT e.course_id
+            FROM enrollments e
+            WHERE e.student_id = ?
+            ORDER BY e.enrolled_at ASC, e.id ASC
+        """;
+        return jdbcTemplate.query(sql, (rs, rowNum) -> rs.getLong("course_id"), studentId);
     }
 }

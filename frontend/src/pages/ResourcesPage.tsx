@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router'
-import { getCourseResources, getStudentProgress, completeResource } from '../api/academicApi'
+import {
+  completeResource,
+  completeResourceLocally,
+  completeResourceOffline,
+  getCourseResources,
+  getStudentProgress,
+} from '../api/academicApi'
 import type { Resource } from '../types/academic'
 import ResourceCard from '../components/ui/ResourceCard'
 import { IoChevronBackOutline } from 'react-icons/io5'
@@ -53,6 +59,7 @@ export function ResourcesPage() {
   const [pendingId, setPendingId] = useState<number | null>(null) // ID del recurso que se está completando en este momento
   const [error, setError] = useState<string | null>(null)
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
+  const [localWarning, setLocalWarning] = useState<string | null>(null)
 
   // Función para descargar los recursos de la materia y el progreso del estudiante actual
   const fetchResourcesAndProgress = async () => {
@@ -105,23 +112,49 @@ export function ResourcesPage() {
   // concurrentemente con hilos de ejecución de base de datos y publica un evento en RabbitMQ
   // para que FastAPI de Python actualice sus recomendaciones.
   const handleMarkCompleted = async (resourceId: number, resourceTitle: string) => {
+    if (pendingId !== null) {
+      return
+    }
+
     try {
       setPendingId(resourceId) // Activa el icono de "Procesando..." para este recurso específico
       setError(null)
       setSuccessMsg(null)
+      setLocalWarning(null)
+
+      if (!navigator.onLine) {
+        await completeResourceOffline(numericUserId, resourceId)
+        setCompletedIds((prev) => (prev.includes(resourceId) ? prev : [...prev, resourceId]))
+        setSuccessMsg('El cambio quedó pendiente de sincronización.')
+        setTimeout(() => setSuccessMsg(null), 7000)
+        return
+      }
 
       // Ejecutar llamada al backend
       await completeResource(numericUserId, resourceId)
 
       // Actualizar estado local inmediato para pintar la tarjeta de verde de forma instantánea
-      setCompletedIds((prev) => [...prev, resourceId])
-      setSuccessMsg(`¡Excelente! Completaste "${resourceTitle}". Se ha registrado en la base de datos y enviado a la cola de recomendaciones de forma asíncrona.`)
+      setCompletedIds((prev) => (prev.includes(resourceId) ? prev : [...prev, resourceId]))
+
+      try {
+        await completeResourceLocally(numericUserId, resourceId)
+        setSuccessMsg(`¡Excelente! Completaste "${resourceTitle}". Se ha registrado en la base de datos y enviado a la cola de recomendaciones de forma asíncrona.`)
+      } catch (localError) {
+        console.error('Local cache update failed after server completion:', localError)
+        setLocalWarning('El recurso se completó, pero no pudo actualizarse la copia local.')
+        setSuccessMsg(`¡Excelente! Completaste "${resourceTitle}". Se registró en el servidor.`)
+        setTimeout(() => setLocalWarning(null), 10000)
+      }
       
       // Auto-ocultar mensaje de éxito a los 7 segundos
       setTimeout(() => setSuccessMsg(null), 7000)
     } catch (err) {
       console.error('Error completing resource:', err)
-      setError('No se pudo marcar el recurso como completado en el servidor.')
+      setError(
+        !navigator.onLine
+          ? 'El cambio quedó pendiente de sincronización.'
+          : 'No se pudo completar el recurso en el servidor.',
+      )
     } finally {
       setPendingId(null)
     }
@@ -158,6 +191,12 @@ export function ResourcesPage() {
       {successMsg && (
         <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-sm font-medium animate-[fadeIn_0.3s_ease-out]">
           {successMsg}
+        </div>
+      )}
+
+      {localWarning && (
+        <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 text-amber-700 dark:text-amber-300 text-sm font-medium animate-[fadeIn_0.3s_ease-out]">
+          {localWarning}
         </div>
       )}
 

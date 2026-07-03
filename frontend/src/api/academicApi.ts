@@ -19,6 +19,18 @@ import {
 } from '../offline/catalog-cache'
 
 import { addPendingOperation } from '../offline/pending-operations'
+import {
+  getStudentProgressFromCache,
+  markResourceCompletedLocally,
+  saveStudentProgress,
+} from '../offline/progress-cache'
+import {
+  appendStudentEnrolledCourse,
+  getStudentEnrolledCoursesFromCache,
+  getStudentRecommendationsFromCache,
+  saveStudentEnrolledCourses,
+  saveStudentRecommendations,
+} from '../offline/local-data-cache'
 
 export async function getSubjects(): Promise<Subject[]> {
 
@@ -88,34 +100,58 @@ export async function completeResource(
   studentId: number,
   resourceId: number,
 ): Promise<void> {
+  await apiClient.post(
+    `/api/students/${studentId}/resources/${resourceId}/complete`,
+  )
+}
 
-  const operation = {
-    type: 'COMPLETE_RESOURCE' as const,
+export async function completeResourceLocally(
+  studentId: number,
+  resourceId: number,
+  completedAt: string = new Date().toISOString(),
+): Promise<StudentProgressApiResponse> {
+  return markResourceCompletedLocally(studentId, resourceId, completedAt)
+}
+
+export async function completeResourceOffline(
+  studentId: number,
+  resourceId: number,
+): Promise<StudentProgressApiResponse> {
+  const completedAt = new Date().toISOString()
+
+  await addPendingOperation({
+    type: 'COMPLETE_RESOURCE',
     payload: {
       studentId,
       resourceId,
     },
-    createdAt: new Date().toISOString(),
-  }
+    createdAt: completedAt,
+  })
 
-  if (!navigator.onLine) {
-    await addPendingOperation(operation)
-    return
-  }
-
-  await apiClient.post(
-    `/api/students/${studentId}/resources/${resourceId}/complete`,
-  )
+  return markResourceCompletedLocally(studentId, resourceId, completedAt)
 }
 
 // Obtiene las estadísticas de progreso globales de un estudiante (cuántos recursos completó y porcentaje).
 export async function getStudentProgress(
   studentId: number,
 ): Promise<StudentProgressApiResponse> {
-  const { data } = await apiClient.get<StudentProgressApiResponse>(
-    `/api/students/${studentId}/progress`,
-  )
-  return data
+  try {
+    const { data } = await apiClient.get<StudentProgressApiResponse>(
+      `/api/students/${studentId}/progress`,
+    )
+    await saveStudentProgress(data)
+    return data
+  } catch {
+    const cachedProgress = await getStudentProgressFromCache(studentId)
+
+    return (
+      cachedProgress ?? {
+        studentId,
+        completedResourceIds: [],
+        totalCompletedResources: 0,
+      }
+    )
+  }
 }
 
 // Llama al motor inteligente de Python (FastAPI) para recibir sugerencias personalizadas
@@ -123,10 +159,22 @@ export async function getStudentProgress(
 export async function getStudentRecommendations(
   studentId: number,
 ): Promise<StudentRecommendationsResponse> {
-  const { data } = await apiClient.get<StudentRecommendationsResponse>(
-    `/api/students/${studentId}/recommendations`,
-  )
-  return data
+  try {
+    const { data } = await apiClient.get<StudentRecommendationsResponse>(
+      `/api/students/${studentId}/recommendations`,
+    )
+    await saveStudentRecommendations(data)
+    return data
+  } catch {
+    const cachedRecommendations = await getStudentRecommendationsFromCache(studentId)
+
+    return (
+      cachedRecommendations ?? {
+        studentId,
+        recommendations: [],
+      }
+    )
+  }
 }
 // Obtiene el contador optimizado de todos los recursos del catálogo para evitar el problema N+1
 export async function getCatalogResourceCountApi(): Promise<number> {
@@ -136,6 +184,7 @@ export async function getCatalogResourceCountApi(): Promise<number> {
 
 export async function enrollInCourse(studentId: number, courseId: number): Promise<void> {
   await apiClient.post(`/api/students/${studentId}/courses/${courseId}/enroll`)
+  await appendStudentEnrolledCourse(studentId, courseId)
 }
 
 export async function getProfessorStudents(professorId: number): Promise<number[]> {
@@ -144,6 +193,29 @@ export async function getProfessorStudents(professorId: number): Promise<number[
 }
 
 export async function getStudentEnrolledCourses(studentId: number): Promise<number[]> {
-  const { data } = await apiClient.get<number[]>(`/api/students/${studentId}/courses`)
-  return data
+  try {
+    const { data } = await apiClient.get<number[]>(
+      `/api/students/${studentId}/courses`,
+    )
+    await saveStudentEnrolledCourses(studentId, data)
+    return data
+  } catch {
+    const cachedCourseIds = await getStudentEnrolledCoursesFromCache(studentId)
+
+    if (cachedCourseIds.length > 0) {
+      return cachedCourseIds
+    }
+
+    const cachedProgress = await getStudentProgressFromCache(studentId)
+    if (!cachedProgress || cachedProgress.completedResourceIds.length === 0) {
+      return []
+    }
+
+    const cachedResources = await getCachedResources()
+    const inferredCourseIds = cachedResources
+      .filter(resource => cachedProgress.completedResourceIds.includes(resource.id))
+      .map(resource => resource.courseId)
+
+    return Array.from(new Set(inferredCourseIds)).sort((left, right) => left - right)
+  }
 }
