@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import Navbar from '../components/ui/Navbar'
-import { useOfflineStatus } from '../hooks/useOfflineStatus'
+import { useOfflineSync } from '../hooks/useOfflineSync'
+import { useAuth } from '../context/AuthProvider'
 // Este es el "molde" o cascarón de nuestra aplicación.
 // En lugar de repetir el Navbar y los estilos de fondo en cada página,
 // envolvemos las páginas dentro de este MainLayout para que se vean uniformes.
@@ -9,7 +10,34 @@ type MainLayoutProps = {
 }
 
 function MainLayout({ children }: MainLayoutProps) {
-    const isOnline = useOfflineStatus()
+  const { authNotice } = useAuth()
+  const {
+    isOnline,
+    isSyncing,
+    pendingCount,
+    lastSyncAt,
+    lastSyncError,
+  } = useOfflineSync()
+
+  const syncMessage = !isOnline
+    ? 'Sin conexión. Los cambios se guardarán localmente.'
+    : isSyncing
+      ? 'Sincronizando cambios pendientes...'
+      : lastSyncError
+        ? 'Error al sincronizar. Revisa los cambios pendientes.'
+        : pendingCount > 0
+          ? `Cambios pendientes: ${pendingCount}`
+          : 'Todos los cambios sincronizados'
+
+  const syncClasses = !isOnline
+    ? 'bg-amber-500 text-white border-amber-500'
+    : isSyncing
+      ? 'bg-blue-600 text-white border-blue-600'
+      : lastSyncError
+        ? 'bg-red-100 text-red-800 dark:bg-red-950/30 dark:text-red-300 border-red-200 dark:border-red-900/40'
+        : pendingCount > 0
+          ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/30 dark:text-amber-300 border-amber-200 dark:border-amber-900/40'
+          : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300 border-emerald-200 dark:border-emerald-900/40'
   return (
     // Aplica el color de fondo adaptativo para Modo Claro (bg-slate-50) y Modo Oscuro (dark:bg-slate-950)
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col transition-colors duration-300 relative overflow-hidden">
@@ -20,11 +48,28 @@ function MainLayout({ children }: MainLayoutProps) {
       {/* Componente Navbar adaptativo (Mobile-First) */}
       <Navbar />
 
-      {!isOnline && (
-        <div className="bg-amber-500 text-white text-center py-3 px-4 font-semibold shadow-md">
-          Estás trabajando sin conexión. Los cambios se guardarán localmente y se sincronizarán cuando vuelva el Internet.
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 mt-3" aria-live="polite">
+        {authNotice && (
+          <div className="mb-3 rounded-2xl px-4 py-3 text-sm font-semibold shadow-sm border bg-amber-100 text-amber-900 dark:bg-amber-950/30 dark:text-amber-200 border-amber-200 dark:border-amber-900/40">
+            {authNotice}
+          </div>
+        )}
+        <div className={`rounded-2xl px-4 py-3 text-sm font-semibold shadow-sm border ${syncClasses}`}>
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+            <span>{syncMessage}</span>
+            <span className="text-xs font-medium opacity-90">
+              {lastSyncAt
+                ? `Última sincronización: ${new Date(lastSyncAt).toLocaleTimeString('es-EC')}`
+                : 'Sin historial de sincronización'}
+            </span>
+          </div>
+          {lastSyncError && isOnline && (
+            <p className="mt-1 text-xs font-normal opacity-90">
+              {lastSyncError}
+            </p>
+          )}
         </div>
-      )}
+      </div>
       <main className="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-10 pb-24 md:pb-10 transition-all z-10">
         {children}
       </main>

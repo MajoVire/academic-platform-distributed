@@ -24,7 +24,7 @@ spec:
       terminationGracePeriodSeconds: 30
       containers:
         - name: academic-service
-          image: academic-platform/academic-service:1.0.2
+          image: academic-platform/academic-service:1.0.4
           imagePullPolicy: IfNotPresent
           ports:
             - name: http

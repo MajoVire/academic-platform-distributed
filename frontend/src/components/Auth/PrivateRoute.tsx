@@ -1,36 +1,46 @@
-import { useEffect } from 'react'
-import { Outlet } from 'react-router'
+import { Navigate, Outlet } from 'react-router'
 import { useAuth } from '../../context/AuthProvider'
 import { AccessDenied } from './AccessDenied'
+import { OfflineSessionRequired } from './OfflineSessionRequired'
+import LoadingSpinner from '../ui/LoadingSpinner'
 
 /**
- * Componente guarda para rutas protegidas.
- * - Si el usuario no está autenticado → redirige a Keycloak.
- * - Si se pasan allowedRoles y el usuario no tiene ninguno → muestra AccessDenied.
- * - Si pasa ambas validaciones → renderiza las rutas hijas con <Outlet />.
+ * Guarda de rutas protegidas.
+ * - Si la autenticación aún se está resolviendo → muestra un loader.
+ * - Si existe sesión online u offline → permite renderizar la ruta.
+ * - Si no hay sesión y el navegador está offline → muestra una vista local.
+ * - Si no hay sesión y el navegador está online → vuelve al inicio.
  */
 export function PrivateRoute({ allowedRoles }: { allowedRoles?: string[] }) {
-  const { isAuthenticated, login, hasRole } = useAuth()
+  const {
+    authStatus,
+    isAuthenticatedOnline,
+    isAuthenticatedOffline,
+    hasRole,
+  } = useAuth()
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      login()
-    }
-  }, [isAuthenticated, login])
-
-  // Mientras redirige a Keycloak
-  if (!isAuthenticated) {
-    return null
+  if (authStatus === 'loading') {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center px-4">
+        <LoadingSpinner size="lg" />
+      </div>
+    )
   }
 
-  // Validación de roles: si se especifican roles permitidos, el usuario debe tener al menos uno
-  if (allowedRoles && allowedRoles.length > 0) {
-    const hasPermission = allowedRoles.some((role) => hasRole(role))
-    if (!hasPermission) {
-      return <AccessDenied />
+  if (isAuthenticatedOnline || isAuthenticatedOffline) {
+    if (allowedRoles && allowedRoles.length > 0) {
+      const hasPermission = allowedRoles.some((role) => hasRole(role))
+      if (!hasPermission) {
+        return <AccessDenied />
+      }
     }
+
+    return <Outlet />
   }
 
-  return <Outlet />
+  if (!navigator.onLine) {
+    return <OfflineSessionRequired />
+  }
+
+  return <Navigate to="/" replace />
 }
-

@@ -8,16 +8,32 @@ export const apiClient = axios.create({
   },
 })
 
+function getCommonHeaders(): Record<string, string | undefined> {
+  return apiClient.defaults.headers.common as Record<string, string | undefined>
+}
+
+export function setApiClientBearerToken(token: string | null): void {
+  const commonHeaders = getCommonHeaders()
+
+  if (token) {
+    commonHeaders.Authorization = `Bearer ${token}`
+    return
+  }
+
+  delete commonHeaders.Authorization
+}
+
 // Interceptor para añadir el token JWT de Keycloak a cada petición
 apiClient.interceptors.request.use(
   async (config) => {
     if (keycloak.token) {
-      try {
-        // Refresca el token si expira en menos de 60 segundos
-        await keycloak.updateToken(60)
-      } catch (err) {
-        console.error('Failed to refresh token in interceptor', err)
-        keycloak.login()
+      if (navigator.onLine) {
+        try {
+          // Refresca el token si expira en menos de 60 segundos
+          await keycloak.updateToken(60)
+        } catch (err) {
+          console.error('Failed to refresh token in interceptor', err)
+        }
       }
       config.headers.Authorization = `Bearer ${keycloak.token}`
     }
@@ -32,10 +48,6 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response?.status === 401) {
-      console.warn('Unauthorized access, redirecting to login...')
-      keycloak.login()
-    }
     return Promise.reject(error)
   }
 )
