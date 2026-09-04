@@ -240,6 +240,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const authenticated = await keycloak.init({
         onLoad: 'check-sso',
         checkLoginIframe: false,
+        silentCheckSsoFallback: false,
         silentCheckSsoRedirectUri:
           window.location.origin + '/silent-check-sso.html',
         pkceMethod: 'S256',
