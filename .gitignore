@@ -49,3 +49,10 @@ Thumbs.db
 # Context for Codex
 AGENTS.md
 frontend/dev-dist/
+
+# Local demo state and generated load-test evidence
+.demo/
+load-test-results/
+
+# One-off local backups generated while patching deployment files
+*.bak.before-vite-build-args
